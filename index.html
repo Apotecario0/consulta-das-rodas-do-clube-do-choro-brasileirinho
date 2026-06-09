@@ -29,7 +29,7 @@
 }
 
 input::placeholder {
-    color: #78716c !important;            /* Cor do texto de exemplo (Pedaço do nome...) */
+    color: #78716c !important;            /* Cor do texto de exemplo (Nome do musicista, Choro ou compositor...) */
 }
         
         body.dark-mode .bg-stone-100 { background-color: #2d2b29 !important; color: #f5f5f4 !important; }
@@ -73,7 +73,7 @@ input::placeholder {
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="relative">
                         <label class="block text-xs font-black text-stone-500 uppercase tracking-wider mb-1">Busca Geral</label>
-                        <input type="text" id="filtro-busca" oninput="aplicarFiltrosDebounced('filtro-busca')" placeholder="Pedaço do nome, música..." class="w-full rounded-xl border-2 border-stone-200 p-2.5 text-sm outline-none focus:border-emerald-500 transition-all pr-8 bg-white dark:bg-stone-900">
+                        <input type="text" id="filtro-busca" oninput="aplicarFiltrosDebounced('filtro-busca')" placeholder="Nome, Choro ou Compositor..." class="w-full rounded-xl border-2 border-stone-200 p-2.5 text-sm outline-none focus:border-emerald-500 transition-all pr-8 bg-white dark:bg-stone-900">
                         <button id="clear-filtro-busca" onclick="limparInput('filtro-busca')" class="absolute right-3 top-[32px] text-stone-400 hover:text-rose-500 hidden cursor-pointer transition-colors" title="Limpar busca">✖</button>
                     </div>
                     
