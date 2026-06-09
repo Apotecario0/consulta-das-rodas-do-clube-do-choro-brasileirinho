@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clube de Choro do Brasileirinho 🎶</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* Estilos do Modo Roda Noturna com contraste melhorado */
+        body.dark-mode {
+            background-color: #141413 !important;
+            color: #f5f5f4 !important;
+        }
+        body.dark-mode .bg-white {
+            background-color: #21201e !important;
+            color: #f5f5f4 !important;
+            border-color: #3a3835 !important;
+        }
+       input {
+    background-color: #ffffff !important; /* Força o fundo a ficar totalmente branco */
+    color: #1c1917 !important;            /* Força a letra a ser grafite escuro (Stone 900) */
+    border-color: #d6d3d1 !important;       /* Deixa a borda num cinza suave */
+}
+
+input::placeholder {
+    color: #78716c !important;            /* Cor do texto de exemplo (Pedaço do nome...) */
+}
+        
+        body.dark-mode .bg-stone-100 { background-color: #2d2b29 !important; color: #f5f5f4 !important; }
+        body.dark-mode .bg-stone-100:hover { background-color: #3e3b38 !important; }
+        body.dark-mode input { background-color: #2d2b29 !important; color: #ffffff !important; border-color: #44413c !important; }
+        body.dark-mode input::placeholder { color: #78716c !important; }
+        body.dark-mode .border-amber-100, body.dark-mode .border-stone-100 { border-color: #3a3835 !important; }
+        body.dark-mode .bg-stone-200\/60 { background-color: #2d2b29 !important; }
+    </style>
+</head>
+<body id="body-app" class="bg-amber-50/40 text-stone-800 min-h-screen p-4 md:p-8 selection:bg-emerald-100 transition-colors duration-300">
+
+    <div class="max-w-4xl mx-auto">
+        <header class="relative text-center mb-10 transform hover:scale-102 transition-transform duration-300">
+            <button onclick="toggleDarkMode()" class="absolute right-2 top-2 p-2 rounded-full bg-stone-200/60 hover:bg-stone-200 dark:bg-stone-800 text-lg cursor-pointer transition" title="Alternar Modo Roda Noturna">
+                <span id="dark-mode-icon">🌙</span>
+            </button>
+            <span class="text-5xl">🎶</span>
+            <h1 class="text-4xl font-black text-emerald-800 dark:text-emerald-400 tracking-tight mt-2 drop-shadow-xs">Brasileirinho</h1>
+            <p class="text-amber-700/80 dark:text-amber-400/90 font-medium tracking-wide">Clube de Choro do Brasileirinho: Registro dos Encontros</p>
+        </header>
+
+        <div class="flex bg-stone-200/60 p-1.5 rounded-full mb-8 max-w-md mx-auto shadow-inner">
+            <button onclick="switchTab('consulta-tab')" id="btn-consulta" class="flex-1 py-2.5 px-4 rounded-full text-sm font-bold text-emerald-900 bg-white shadow-xs transition-all cursor-pointer tab-btn">
+                🔍 Encontros & Filtros
+            </button>
+            <button onclick="switchTab('dashboard-tab')" id="btn-dashboard" class="flex-1 py-2.5 px-4 rounded-full text-sm font-bold text-stone-600 hover:text-stone-400 transition-all cursor-pointer tab-btn">
+                📊 Painel & Estatísticas
+            </button>
+        </div>
+
+        <div id="consulta-tab" class="tab-content block space-y-6">
+            <div class="bg-white rounded-2xl shadow-md border border-amber-100 p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-black text-stone-800 flex items-center gap-2">🔍 Filtros Avançados</h2>
+                    <span id="badge-filtros" class="hidden text-xs bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 animate-pulse">
+                        Filtro Ativo
+                    </span>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="relative">
+                        <label class="block text-xs font-black text-stone-500 uppercase tracking-wider mb-1">Busca Geral</label>
+                        <input type="text" id="filtro-busca" oninput="aplicarFiltrosDebounced('filtro-busca')" placeholder="Pedaço do nome, música..." class="w-full rounded-xl border-2 border-stone-200 p-2.5 text-sm outline-none focus:border-emerald-500 transition-all pr-8 bg-white dark:bg-stone-900">
+                        <button id="clear-filtro-busca" onclick="limparInput('filtro-busca')" class="absolute right-3 top-[32px] text-stone-400 hover:text-rose-500 hidden cursor-pointer transition-colors" title="Limpar busca">✖</button>
+                    </div>
+                    
+                    <div class="relative">
+                        <label class="block text-xs font-black text-stone-500 uppercase tracking-wider mb-1">Instrumento</label>
+                        <input type="text" id="filtro-instrumento" oninput="aplicarFiltrosDebounced('filtro-instrumento')" placeholder="Ex: pand, clar..." class="w-full rounded-xl border-2 border-stone-200 p-2.5 text-sm outline-none focus:border-emerald-500 transition-all pr-8 bg-white dark:bg-stone-900">
+                        <button id="clear-filtro-instrumento" onclick="limparInput('filtro-instrumento')" class="absolute right-3 top-[32px] text-stone-400 hover:text-rose-500 hidden cursor-pointer transition-colors" title="Limpar instrumento">✖</button>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-black text-stone-500 uppercase tracking-wider mb-1">Intervalo de Datas</label>
+                        <div class="flex gap-2">
+                            <input type="date" id="filtro-data-inicio" onchange="aplicarFiltros()" class="w-full rounded-xl border-2 border-stone-200 p-2 text-xs outline-none focus:border-emerald-500 transition-all bg-white dark:bg-stone-900">
+                            <input type="date" id="filtro-data-fim" onchange="aplicarFiltros()" class="w-full rounded-xl border-2 border-stone-200 p-2 text-xs outline-none focus:border-emerald-500 transition-all bg-white dark:bg-stone-900">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-2 mt-4 pt-3 border-t border-stone-100/60 items-center">
+                    <span class="text-[11px] font-black text-stone-400 uppercase tracking-wider">Atalhos:</span>
+                    <button onclick="aplicarChip('Percussão', 'inst')" class="text-xs bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 px-3 py-1 rounded-full font-bold transition hover:scale-105 cursor-pointer">🪘 Percussão</button>
+                    <button onclick="aplicarChip('Clarinete', 'inst')" class="text-xs bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 px-3 py-1 rounded-full font-bold transition hover:scale-105 cursor-pointer">🎷 Clarinete</button>
+                    <button onclick="aplicarChip('Flauta', 'inst')" class="text-xs bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 px-3 py-1 rounded-full font-bold transition hover:scale-105 cursor-pointer">🎵 Flauta</button>
+                    <button onclick="aplicarChip('Pixinguinha', 'busca')" class="text-xs bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 px-3 py-1 rounded-full font-bold transition hover:scale-105 cursor-pointer">✍️ Pixinguinha</button>
+                </div>
+                
+                <div class="flex justify-between items-center mt-4 pt-2 border-t border-stone-100">
+                    <p id="texto-contador-registros" class="text-xs text-stone-500 font-medium">Iniciando ambiente...</p>
+                    <div class="flex gap-2">
+                        <button onclick="exportarParaCSV()" class="text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 py-1.5 px-4 rounded-full cursor-pointer transition">
+                            📥 Exportar Filtrados
+                        </button>
+                        <button onclick="limparFiltros()" class="text-xs font-bold text-rose-700 bg-rose-50 dark:bg-rose-950/40 py-1.5 px-4 rounded-full cursor-pointer transition">
+                            Limpar Filtros
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-md border border-amber-100 p-6">
+                <h2 class="text-xl font-black text-stone-800 mb-4 flex items-center gap-2">📜 Histórico dos Encontros:</h2>
+                <div id="historico-lista" class="space-y-3">
+                    <div class="animate-pulse space-y-3" id="main-skeleton">
+                        <div class="h-12 bg-stone-200/60 dark:bg-stone-800 rounded-xl w-full"></div>
+                        <div class="h-12 bg-stone-200/60 dark:bg-stone-800 rounded-xl w-full"></div>
+                        <div class="h-12 bg-stone-200/60 dark:bg-stone-800 rounded-xl w-full"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="dashboard-tab" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-emerald-800 text-emerald-50 p-5 rounded-2xl shadow-sm flex flex-col justify-between">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold uppercase tracking-widest opacity-70">Resumo Geral</span>
+                        <span id="txt-filtro-aviso-dash" class="text-[10px] bg-emerald-900/60 text-emerald-200 font-bold px-2 py-0.5 rounded-md hidden">Visão Filtrada</span>
+                    </div>
+                    <div class="flex justify-between items-baseline mt-4">
+                        <div><p class="text-3xl font-black" id="dash-total-rodas">0</p><p class="text-xs opacity-80">Total de Rodas</p></div>
+                        <div><p class="text-3xl font-black" id="dash-total-musicos">0</p><p class="text-xs opacity-80">Musicistas Únicos</p></div>
+                        <div><p class="text-3xl font-black" id="dash-total-musicas">0</p><p class="text-xs opacity-80">Choros Tocados</p></div>
+                    </div>
+                </div>
+
+                <div class="bg-amber-500 text-amber-950 p-5 rounded-2xl shadow-sm flex flex-col justify-between">
+                    <span class="text-xs font-black uppercase tracking-widest text-amber-900/80">👑 Recorde de Presença</span>
+                    <div class="mt-4">
+                        <p class="text-xl font-black leading-tight" id="chart-val-pico-musicos">Calculando...</p>
+                        <p class="text-xs text-amber-900/70 mt-1">O encontro mais cheio no recorte selecionado.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex bg-stone-100 p-1 rounded-xl max-w-xs mx-auto justify-between shadow-xs">
+                <button onclick="alternarSubVisaoDash('mini')" id="sub-btn-mini" class="flex-1 py-1.5 px-3 text-xs font-black rounded-lg transition-all bg-white text-emerald-950 shadow-2xs cursor-pointer">
+                    📋 Visão Rápida
+                </button>
+                <button onclick="alternarSubVisaoDash('avancada')" id="sub-btn-avancada" class="flex-1 py-1.5 px-3 text-xs font-bold rounded-lg transition-all text-stone-500 hover:text-stone-400 cursor-pointer">
+                    📈 Gráficos Avançados
+                </button>
+            </div>
+
+            <div id="dash-visao-mini" class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white p-6 rounded-2xl shadow-sm border border-amber-100">
+                <div class="space-y-4">
+                    <h3 class="font-black text-sm text-emerald-900 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1">🎵 Mais Tocadas</h3>
+                    <div id="ranking-musicas" class="space-y-3"></div>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="font-black text-sm text-amber-800 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1">✍️ Compositores</h3>
+                    <div id="ranking-compositores" class="space-y-3"></div>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="font-black text-sm text-stone-700 dark:text-stone-300 uppercase tracking-wider flex items-center gap-1">👥 Dias mais Cheios</h3>
+                    <div id="ranking-dias-cheios" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <div id="dash-visao-avancada" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-100 h-80 flex flex-col">
+                    <h4 class="text-xs font-black text-stone-500 uppercase tracking-wider mb-2">📈 Evolução de Presença nas Rodas</h4>
+                    <div class="relative flex-1"><canvas id="chart-evolucao-presenca"></canvas></div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-100 h-80 flex flex-col">
+                    <h4 class="text-xs font-black text-stone-500 uppercase tracking-wider mb-2">🎵 Top 10 Choros Mais Executados</h4>
+                    <div class="relative flex-1"><canvas id="chart-top-musicas"></canvas></div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-100 h-80 flex flex-col">
+                    <h4 class="text-xs font-black text-stone-500 uppercase tracking-wider mb-2">✍️ Top 10 Compositores do Repertório</h4>
+                    <div class="relative flex-1"><canvas id="chart-top-compositores"></canvas></div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-100 h-80 flex flex-col">
+                    <h4 class="text-xs font-black text-stone-500 uppercase tracking-wider mb-2">🎷 Mix de Instrumentos Identificados</h4>
+                    <div class="relative flex-1"><canvas id="chart-mix-instrumentos"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzPIbyianh-eI0SMVW1Xj4Qcf6dpYwDIJ_isycG8_FooXVI53Cz4Mo2e9r9VYAORkFJow/exec";
+
+        let todosOsEncontros = [];
+        let encontrosFiltradosGlobais = [];
+        let instanciasGraficos = {};
+
+        function removerAcentos(str) {
+            if (!str) return "";
+            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        }
+
+        let debounceTimer;
+        function aplicarFiltrosDebounced(inputId) {
+            const inputVal = document.getElementById(inputId).value;
+            const btnClear = document.getElementById('clear-' + inputId);
+            if (inputVal.length > 0) {
+                btnClear.classList.remove('hidden');
+            } else {
+                btnClear.classList.add('hidden');
+            }
+
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                aplicarFiltros();
+            }, 300);
+        }
+
+        function limparInput(inputId) {
+            document.getElementById(inputId).value = '';
+            document.getElementById('clear-' + inputId).classList.add('hidden');
+            aplicarFiltros();
+        }
+
+        function limparDataHistorico(dataStr) {
+            if (!dataStr) return "Sem data";
+            if (dataStr.includes('T') && dataStr.includes('/')) {
+                const partes = dataStr.split('/');
+                return `${partes[0].split('T')[0].padStart(2, '0')}/${partes[1].padStart(2, '0')}/${partes[2]}`;
+            }
+            if (dataStr.includes('-')) {
+                const partes = dataStr.split('T')[0].split('-');
+                return `${partes[2]}/${partes[1]}/${partes[0]}`;
+            }
+            return dataStr;
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.replace('block', 'hidden'));
+            document.getElementById(tabId).classList.replace('hidden', 'block');
+            
+            document.querySelectorAll('.tab-btn').forEach(el => el.className = "flex-1 py-2.5 px-4 rounded-full text-sm font-bold text-stone-600 hover:text-stone-400 transition-all cursor-pointer tab-btn");
+            const activeBtn = tabId === 'consulta-tab' ? 'btn-consulta' : 'btn-dashboard';
+            document.getElementById(activeBtn).className = "flex-1 py-2.5 px-4 rounded-full text-sm font-bold text-emerald-900 bg-white shadow-xs transition-all cursor-pointer tab-btn";
+        }
+
+        function alternarSubVisaoDash(visao) {
+            const painelMini = document.getElementById('dash-visao-mini');
+            const painelAvancado = document.getElementById('dash-visao-avancada');
+            const btnMini = document.getElementById('sub-btn-mini');
+            const btnAvancado = document.getElementById('sub-btn-avancada');
+
+            if (visao === 'mini') {
+                painelMini.classList.remove('hidden');
+                painelAvancado.classList.add('hidden');
+                btnMini.className = "flex-1 py-1.5 px-3 text-xs font-black rounded-lg transition-all bg-white text-emerald-950 shadow-2xs cursor-pointer";
+                btnAvancado.className = "flex-1 py-1.5 px-3 text-xs font-bold rounded-lg transition-all text-stone-500 hover:text-stone-400 cursor-pointer";
+            } else {
+                painelMini.classList.add('hidden');
+                painelAvancado.classList.remove('hidden');
+                btnMini.className = "flex-1 py-1.5 px-3 text-xs font-bold rounded-lg transition-all text-stone-500 hover:text-stone-400 cursor-pointer";
+                btnAvancado.className = "flex-1 py-1.5 px-3 text-xs font-black rounded-lg transition-all bg-white text-emerald-950 shadow-2xs cursor-pointer";
+            }
+        }
+
+        function toggleDarkMode() {
+            const body = document.getElementById('body-app');
+            const icone = document.getElementById('dark-mode-icon');
+            
+            if (body.classList.contains('dark-mode')) {
+                body.classList.remove('dark-mode');
+                icone.innerText = "🌙";
+                localStorage.setItem('brasileirinho_theme', 'light');
+            } else {
+                body.classList.add('dark-mode');
+                icone.innerText = "☀️";
+                localStorage.setItem('brasileirinho_theme', 'dark');
+            }
+        }
+
+        function aplicarChip(valor, tipo) {
+            if (tipo === 'inst') {
+                document.getElementById('filtro-instrumento').value = valor;
+                document.getElementById('clear-filtro-instrumento').classList.remove('hidden');
+            } else {
+                document.getElementById('filtro-busca').value = valor;
+                document.getElementById('clear-filtro-busca').classList.remove('hidden');
+            }
+            aplicarFiltros();
+        }
+
+        function filtrarPorMusico(nome) {
+            document.getElementById('filtro-busca').value = nome;
+            document.getElementById('clear-filtro-busca').classList.remove('hidden');
+            switchTab('consulta-tab');
+            aplicarFiltros();
+            window.scrollTo({ top: 150, behavior: 'smooth' });
+        }
+
+        function renderizarHistorico(rodas, buscaOriginal = '', instrumentoOriginal = '') {
+            const container = document.getElementById('historico-lista');
+            
+            if (rodas.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-10 bg-stone-50 dark:bg-stone-900/40 rounded-xl border border-dashed border-stone-200 dark:border-stone-800">
+                        <span class="text-5xl mb-3 block">🏜️</span>
+                        <h3 class="text-lg font-black text-stone-700 dark:text-stone-300 mb-1">Nenhum choro encontrado!</h3>
+                        <p class="text-sm text-stone-500 mb-5">O nosso acervo ainda não tem registros que batam com essa pesquisa.</p>
+                        <button onclick="limparFiltros()" class="bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 px-5 py-2.5 rounded-full font-bold text-sm hover:scale-105 transition cursor-pointer">
+                            ↻ Limpar Filtros
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            container.innerHTML = '';
+            
+            const buscaNormalizada = removerAcentos(buscaOriginal);
+            const instNormalizado = removerAcentos(instrumentoOriginal);
+            
+            rodas.forEach(r => {
+                const nomes = r.musicosNomes ? r.musicosNomes.split(' | ') : [];
+                const insts = r.musicosInst ? r.musicosInst.split(' | ') : [];
+                const musicas = r.repMusicas ? r.repMusicas.split(' | ') : [];
+                const comps = r.repComps ? r.repComps.split(' | ') : [];
+
+                let musicosHtml = [];
+                nomes.forEach((n, i) => {
+                    if (!n.trim()) return;
+                    const inst = insts[i] || '?';
+                    
+                    const strComparacao = removerAcentos(`${n} ${inst}`);
+                    const atendeBusca = buscaNormalizada ? strComparacao.includes(buscaNormalizada) : true;
+                    const atendeInst = instNormalizado ? removerAcentos(inst).includes(instNormalizado) : true;
+                    
+                    // Exibe apenas os músicos que batem com os filtros ativos
+                    if (atendeBusca && atendeInst) {
+                        const tagMusico = `<span onclick="filtrarPorMusico('${n.trim().replace(/'/g, "\\'")}')" class="cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline font-semibold transition-colors" title="Ver histórico deste músico">${n}</span>`;
+                        musicosHtml.push(`<li>• ${tagMusico} <span class="text-stone-400 text-xs">(${inst})</span></li>`);
+                    }
+                });
+
+                // Se houveram músicos, mas todos foram ocultados pelo filtro, deixamos um aviso discreto
+                if (musicosHtml.length === 0 && nomes.length > 0) {
+                    musicosHtml.push(`<li><span class="text-stone-400 text-[11px] italic">...outros músicos ocultados pelo filtro</span></li>`);
+                }
+
+                let musicasHtml = [];
+                musicas.forEach((m, i) => {
+                    if (!m.trim()) return;
+                    const comp = comps[i] || 'Domínio Público';
+                    
+                    const strComparacao = removerAcentos(`${m} ${comp}`);
+                    const atendeBusca = buscaNormalizada ? strComparacao.includes(buscaNormalizada) : true;
+                    
+                    // Exibe apenas as músicas que batem com o filtro de busca geral
+                    if (atendeBusca) {
+                        const linkAudio = `https://www.youtube.com/results?search_query=Choro+${encodeURIComponent(m.trim())}+${encodeURIComponent(comp.trim())}`;
+                        const tagMusica = `<a href="${linkAudio}" target="_blank" class="hover:text-emerald-700 dark:hover:text-emerald-400 hover:underline inline-flex items-center gap-1" title="Procurar gravação no YouTube">"${m}" <span class="text-[10px] opacity-60">↗️</span></a>`;
+                        musicasHtml.push(`<li>• ${tagMusica} <span class="text-stone-400 text-xs">— ${comp}</span></li>`);
+                    }
+                });
+
+                if (musicasHtml.length === 0 && musicas.length > 0) {
+                    musicasHtml.push(`<li><span class="text-stone-400 text-[11px] italic">...repertório ocultado pelo filtro</span></li>`);
+                }
+
+                const btn = document.createElement('button');
+                btn.className = "w-full text-left font-bold text-stone-700 bg-stone-100 hover:bg-stone-200 p-3.5 rounded-xl outline-none flex justify-between items-center transition cursor-pointer";
+                btn.innerHTML = `<span>Encontro #${r.encontroNumero} — <span class="text-stone-500 font-medium">${limparDataHistorico(r.data)}</span></span><span class="text-xs bg-white text-stone-500 px-2 py-1 rounded-md shadow-2xs">Ver ▾</span>`;
+
+                const panel = document.createElement('div');
+                panel.className = "accordion-content bg-white border-x border-b border-stone-100 rounded-b-xl px-4";
+                panel.innerHTML = `
+                    <div class="py-4 text-sm space-y-3">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div><strong class="text-emerald-800 dark:text-emerald-400 text-xs uppercase tracking-wider block mb-1">Musicistas na Roda</strong><ul class="space-y-1 text-stone-600">${musicosHtml.join('')}</ul></div>
+                            <div><strong class="text-amber-700 dark:text-amber-400 text-xs uppercase tracking-wider block mb-1">Choros Tocados</strong><ul class="space-y-1 text-stone-600">${musicasHtml.join('')}</ul></div>
+                        </div>
+                        ${r.observacoes ? `<div class="bg-stone-50 dark:bg-stone-900/60 p-2.5 rounded-lg text-xs text-stone-600"><strong>Nota:</strong> ${r.observacoes}</div>` : ''}
+                    </div>
+                `;
+
+                btn.addEventListener('click', function() {
+                    if (panel.style.maxHeight) panel.style.maxHeight = null;
+                    else panel.style.maxHeight = panel.scrollHeight + "px";
+                });
+
+                container.appendChild(btn);
+                container.appendChild(panel);
+            });
+        }
+
+        function aplicarFiltros() {
+            const buscaOriginal = document.getElementById('filtro-busca').value.trim();
+            const instrumentoOriginal = document.getElementById('filtro-instrumento').value.trim();
+            
+            const busca = removerAcentos(buscaOriginal);
+            const instrumento = removerAcentos(instrumentoOriginal);
+            
+            const dataInicio = document.getElementById('filtro-data-inicio').value;
+            const dataFim = document.getElementById('filtro-data-fim').value;
+
+            const urlParams = new URLSearchParams();
+            if (buscaOriginal) urlParams.set('busca', buscaOriginal);
+            if (instrumentoOriginal) urlParams.set('inst', instrumentoOriginal);
+            if (dataInicio) urlParams.set('inicio', dataInicio);
+            if (dataFim) urlParams.set('fim', dataFim);
+            const stringUrl = urlParams.toString() ? '?' + urlParams.toString() : window.location.pathname;
+            window.history.replaceState({}, '', stringUrl);
+
+            encontrosFiltradosGlobais = todosOsEncontros.filter(r => {
+                if (busca) {
+                    const corpoTexto = removerAcentos([r.encontroNumero, r.musicosNomes, r.repMusicas, r.repComps, r.observacoes].join(' '));
+                    if (!corpoTexto.includes(busca)) return false;
+                }
+                if (instrumento) {
+                    const instrumentosTexto = removerAcentos(r.musicosInst || '');
+                    if (!instrumentosTexto.includes(instrumento)) return false;
+                }
+                if (r.data) {
+                    const dataFormatada = r.data.split('T')[0];
+                    if (dataInicio && dataFormatada < dataInicio) return false;
+                    if (dataFim && dataFormatada > dataFim) return false;
+                } else if (dataInicio || dataFim) {
+                    return false;
+                }
+                return true;
+            });
+            
+            const badge = document.getElementById('badge-filtros');
+            const txtContador = document.getElementById('texto-contador-registros');
+            const txtAvisoDash = document.getElementById('txt-filtro-aviso-dash');
+
+            if (busca || instrumento || dataInicio || dataFim) {
+                badge.classList.remove('hidden');
+                txtAvisoDash.classList.remove('hidden');
+                txtContador.innerHTML = `Filtrado: Localizados <strong>${encontrosFiltradosGlobais.length}</strong> de <strong>${todosOsEncontros.length}</strong> encontros.`;
+            } else {
+                badge.classList.add('hidden');
+                txtAvisoDash.classList.add('hidden');
+                txtContador.innerHTML = `Total estável de <strong>${todosOsEncontros.length}</strong> encontros carregados.`;
+            }
+
+            renderizarHistorico(encontrosFiltradosGlobais, buscaOriginal, instrumentoOriginal);
+            atualizarPainelEstatisticas(encontrosFiltradosGlobais);
+        }
+
+        function limparFiltros() {
+            document.getElementById('filtro-busca').value = '';
+            document.getElementById('filtro-instrumento').value = '';
+            document.getElementById('filtro-data-inicio').value = '';
+            document.getElementById('filtro-data-fim').value = '';
+            
+            document.getElementById('clear-filtro-busca').classList.add('hidden');
+            document.getElementById('clear-filtro-instrumento').classList.add('hidden');
+            
+            aplicarFiltros();
+        }
+
+        function exportarParaCSV() {
+            if (encontrosFiltradosGlobais.length === 0) return;
+            
+            let conteudoCsv = "data:text/csv;charset=utf-8,";
+            conteudoCsv += "Encontro;Data;Musicistas;Instrumentos;Choros;Compositores;Observacoes\n";
+            
+            encontrosFiltradosGlobais.forEach(r => {
+                const linha = [
+                    r.encontroNumero,
+                    limparDataHistorico(r.data),
+                    (r.musicosNomes || '').replace(/;/g, ','),
+                    (r.musicosInst || '').replace(/;/g, ','),
+                    (r.repMusicas || '').replace(/;/g, ','),
+                    (r.repComps || '').replace(/;/g, ','),
+                    (r.observacoes || '').replace(/;/g, ',')
+                ].join(";");
+                conteudoCsv += linha + "\n";
+            });
+            
+            const linkCodificado = encodeURI(conteudoCsv);
+            const linkElemento = document.createElement("a");
+            linkElemento.setAttribute("href", linkCodificado);
+            linkElemento.setAttribute("download", `Clube_Choro_Filtrado_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(linkElemento);
+            linkElemento.click();
+            document.body.removeChild(linkElemento);
+        }
+
+        function renderizarMiniRanking(containerId, listaItens, corBarra, sufixo = '×') {
+            const container = document.getElementById(containerId);
+            if (listaItens.length === 0) {
+                container.innerHTML = '<p class="text-xs text-stone-400 italic">Nenhum dado.</p>';
+                return;
+            }
+            const maiorValor = listaItens[0][1];
+            container.innerHTML = listaItens.map(([nome, total]) => {
+                const percentual = maiorValor > 0 ? (total / maiorValor) * 100 : 0;
+                return `
+                    <div class="space-y-0.5">
+                        <div class="flex justify-between text-xs font-bold text-stone-600">
+                            <span class="truncate max-w-[150px]" title="${nome}">${nome}</span>
+                            <span class="text-stone-900">${total}${sufixo}</span>
+                        </div>
+                        <div class="w-full bg-stone-100 dark:bg-stone-800 rounded-full h-2">
+                            <div class="${corBarra} h-2 rounded-full transition-all duration-500" style="width: ${percentual}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function inicializarGraficosAvancados(dadosEvolucao, dadosMusicas, dadosCompositores, dadosInstrumentos) {
+            Object.values(instanciasGraficos).forEach(chart => chart.destroy());
+
+            const opcoesPadrao = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
+
+            instanciasGraficos.evolucao = new Chart(document.getElementById('chart-evolucao-presenca'), {
+                type: 'line',
+                data: {
+                    labels: dadosEvolucao.map(d => d.label),
+                    datasets: [{ label: 'Musicistas', data: dadosEvolucao.map(d => d.valor), borderColor: '#047857', backgroundColor: 'rgba(4, 120, 87, 0.1)', borderWidth: 3, fill: true, tension: 0.2 }]
+                },
+                options: { ...opcoesPadrao, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+            });
+
+            instanciasGraficos.musicas = new Chart(document.getElementById('chart-top-musicas'), {
+                type: 'bar',
+                data: {
+                    labels: dadosMusicas.map(d => d[0]),
+                    datasets: [{ data: dadosMusicas.map(d => d[1]), backgroundColor: '#047857', borderRadius: 6 }]
+                },
+                options: { ...opcoesPadrao, indexAxis: 'y', scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+            });
+
+            instanciasGraficos.compositores = new Chart(document.getElementById('chart-top-compositores'), {
+                type: 'bar',
+                data: {
+                    labels: dadosCompositores.map(d => d[0]),
+                    datasets: [{ data: dadosCompositores.map(d => d[1]), backgroundColor: '#f59e0b', borderRadius: 6 }]
+                },
+                options: { ...opcoesPadrao, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+            });
+
+            instanciasGraficos.instrumentos = new Chart(document.getElementById('chart-mix-instrumentos'), {
+                type: 'doughnut',
+                data: {
+                    labels: dadosInstrumentos.map(d => d[0]),
+                    datasets: [{
+                        data: dadosInstrumentos.map(d => d[1]),
+                        backgroundColor: ['#047857', '#f59e0b', '#78716c', '#10b981', '#f59e0b', '#a8a29e', '#065f46']
+                    }]
+                },
+                options: { ...opcoesPadrao, plugins: { legend: { display: true, position: 'right', labels: { boxWidth: 12, font: { size: 10 } } } } }
+            });
+        }
+
+        function atualizarPainelEstatisticas(listaRodas) {
+            let contagemMusicas = {};
+            let contagemCompositores = {};
+            let contagemInstrumentos = {};
+            let contagemDiasCheios = [];
+            let dadosEvolucaoCronologica = [];
+            let totalMusicosUnicos = new Set();
+            let acumuladorMusicas = 0;
+            let maxMusicosContagem = 0;
+            let dataRecordeMúsicos = "Sem registros";
+
+            const rodasOrdenadas = [...listaRodas].sort((a,b) => Number(a.encontroNumero) - Number(b.encontroNumero));
+
+            rodasOrdenadas.forEach(r => {
+                const nomes = r.musicosNomes ? r.musicosNomes.split(' | ') : [];
+                const insts = r.musicosInst ? r.musicosInst.split(' | ') : [];
+                const musicas = r.repMusicas ? r.repMusicas.split(' | ') : [];
+                const comps = r.repComps ? r.repComps.split(' | ') : [];
+
+                const totalMusicosDessaRoda = nomes.filter(n => n.trim() !== '').length;
+                
+                if (totalMusicosDessaRoda > maxMusicosContagem) {
+                    maxMusicosContagem = totalMusicosDessaRoda;
+                    dataRecordeMúsicos = `${limparDataHistorico(r.data)} (${totalMusicosDessaRoda} Musicistas)`;
+                }
+
+                if (totalMusicosDessaRoda > 0) {
+                    contagemDiasCheios.push([`Encontro #${r.encontroNumero}`, totalMusicosDessaRoda]);
+                    dadosEvolucaoCronologica.push({ label: `#${r.encontroNumero}`, valor: totalMusicosDessaRoda });
+                }
+
+                nomes.forEach((n, i) => {
+                    const nomeLimpo = n.trim();
+                    if(nomeLimpo) {
+                        const nomeNormalizado = nomeLimpo.toLowerCase().split(' ').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+                        totalMusicosUnicos.add(nomeNormalizado);
+                    }
+                    const instLimpo = insts[i] ? insts[i].trim() : '';
+                    if(instLimpo) contagemInstrumentos[instLimpo] = (contagemInstrumentos[instLimpo] || 0) + 1;
+                });
+
+                musicas.forEach((m, i) => {
+                    const musicaLimpa = m.trim();
+                    if(musicaLimpa) {
+                        acumuladorMusicas++;
+                        contagemMusicas[musicaLimpa] = (contagemMusicas[musicaLimpa] || 0) + 1;
+                    }
+                    const compLimpo = comps[i] ? comps[i].trim() : '';
+                    if(compLimpo) contagemCompositores[compLimpo] = (contagemCompositores[compLimpo] || 0) + 1;
+                });
+            });
+
+            document.getElementById('dash-total-rodas').innerText = listaRodas.length;
+            document.getElementById('dash-total-musicos').innerText = totalMusicosUnicos.size;
+            document.getElementById('dash-total-musicas').innerText = acumuladorMusicas;
+            document.getElementById('chart-val-pico-musicos').innerText = dataRecordeMúsicos;
+
+            const topMusicasMini = Object.entries(contagemMusicas).sort((a,b) => b[1] - a[1]).slice(0, 4);
+            const topCompositoresMini = Object.entries(contagemCompositores).sort((a,b) => b[1] - a[1]).slice(0, 4);
+            const topDiasCheiosMini = [...contagemDiasCheios].sort((a, b) => b[1] - a[1]).slice(0, 4);
+
+            renderizarMiniRanking('ranking-musicas', topMusicasMini, 'bg-emerald-600');
+            renderizarMiniRanking('ranking-compositores', topCompositoresMini, 'bg-amber-500');
+            renderizarMiniRanking('ranking-dias-cheios', topDiasCheiosMini, 'bg-stone-500', ' m.');
+
+            const topMusicasGrafico = Object.entries(contagemMusicas).sort((a,b) => b[1] - a[1]).slice(0, 10);
+            const topCompositoresGrafico = Object.entries(contagemCompositores).sort((a,b) => b[1] - a[1]).slice(0, 10);
+            const mixInstrumentosGrafico = Object.entries(contagemInstrumentos).sort((a,b) => b[1] - a[1]).slice(0, 7);
+
+            inicializarGraficosAvancados(dadosEvolucaoCronologica, topMusicasGrafico, topCompositoresGrafico, mixInstrumentosGrafico);
+        }
+
+        function buscarDadosPlanilha() {
+            fetch(WEB_APP_URL)
+            .then(res => res.json())
+            .then(data => {
+                if (!data.rodas || data.rodas.length === 0) return;
+
+                todosOsEncontros = data.rodas;
+                localStorage.setItem('brasileirinho_data_cache', JSON.stringify(data.rodas));
+                processarCargaInicial();
+            })
+            .catch(err => {
+                console.error("Erro ao buscar dados online, usando cache se disponível:", err);
+                const txtContador = document.getElementById('texto-contador-registros');
+                txtContador.innerHTML = `⚠️ Modo Offline (Dados locais históricos).`;
+            });
+        }
+
+        function processarCargaInicial() {
+            const params = new URLSearchParams(window.location.search);
+            let temFiltroNaUrl = false;
+
+            if (params.get('busca')) {
+                document.getElementById('filtro-busca').value = params.get('busca');
+                document.getElementById('clear-filtro-busca').classList.remove('hidden');
+                temFiltroNaUrl = true;
+            }
+            if (params.get('inst')) {
+                document.getElementById('filtro-instrumento').value = params.get('inst');
+                document.getElementById('clear-filtro-instrumento').classList.remove('hidden');
+                temFiltroNaUrl = true;
+            }
+            if (params.get('inicio')) {
+                document.getElementById('filtro-data-inicio').value = params.get('inicio');
+                temFiltroNaUrl = true;
+            }
+            if (params.get('fim')) {
+                document.getElementById('filtro-data-fim').value = params.get('fim');
+                temFiltroNaUrl = true;
+            }
+
+            aplicarFiltros();
+        }
+
+        window.onload = function() {
+            const temaSalvo = localStorage.getItem('brasileirinho_theme');
+            if (temaSalvo === 'dark') toggleDarkMode();
+
+            const cacheLocal = localStorage.getItem('brasileirinho_data_cache');
+            if (cacheLocal) {
+                todosOsEncontros = JSON.parse(cacheLocal);
+                document.getElementById('texto-contador-registros').innerHTML = `Carregando cache local...`;
+                processarCargaInicial();
+            }
+
+            buscarDadosPlanilha();
+        };
+    </script>
+</body>
+</html>
