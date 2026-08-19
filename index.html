@@ -366,8 +366,8 @@ input::placeholder {
                     }
                 });
 
-                //if (musicasHtml.length === 0 && musicas.length > 0) {
-                 //   musicasHtml.push(`<li><span class="text-stone-400 text-[11px] italic">...repertório ocultado pelo filtro</span></li>`);
+                if (musicasHtml.length === 0 && musicas.length > 0) {
+                    musicasHtml.push(`<li><span class="text-stone-400 text-[11px] italic">...repertório ocultado pelo filtro</span></li>`);
                 }
 
                 const btn = document.createElement('button');
