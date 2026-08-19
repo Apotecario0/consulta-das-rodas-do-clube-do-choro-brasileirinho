@@ -351,12 +351,13 @@ input::placeholder {
                 }
 
                 let musicasHtml = [];
-                musicas.forEach((m, i) => {
+                        const buscaEhNomeDeMusico = buscaNormalizada? nomes.some(n => removerAcentos(n).includes(buscaNormalizada)) : false;
+
+                            musicas.forEach((m, i) => {
                     if (!m.trim()) return;
-                    const comp = comps[i] || 'Domínio Público';
-                    
-                    const strComparacao = removerAcentos(`${m} ${comp}`);
-                    const atendeBusca = buscaNormalizada ? strComparacao.includes(buscaNormalizada) : true;
+                        const comp = comps[i] || 'Domínio Público';
+                        const strComparacao = removerAcentos(`${m} ${comp}`);
+                        const atendeBusca = buscaEhNomeDeMusico? true : (buscaNormalizada? strComparacao.includes(buscaNormalizada) : true);
                     
                     // Exibe apenas as músicas que batem com o filtro de busca geral
                     if (atendeBusca) {
