@@ -1,693 +1,949 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clube de Choro do Brasileirinho 🎶</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        .accordion-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        /* Estilos do Modo Roda Noturna com contraste melhorado */
-        body.dark-mode {
-            background-color: #141413 !important;
-            color: #f5f5f4 !important;
-        }
-        body.dark-mode .bg-white {
-            background-color: #21201e !important;
-            color: #f5f5f4 !important;
-            border-color: #3a3835 !important;
-        }
-       input {
-    background-color: #ffffff !important; /* Força o fundo a ficar totalmente branco */
-    color: #1c1917 !important;            /* Força a letra a ser grafite escuro (Stone 900) */
-    border-color: #d6d3d1 !important;       /* Deixa a borda num cinza suave */
-}
-
-input::placeholder {
-    color: #78716c !important;            /* Cor do texto de exemplo (Nome do musicista, Choro ou compositor...) */
-}
-        
-        body.dark-mode .bg-stone-100 { background-color: #2d2b29 !important; color: #f5f5f4 !important; }
-        body.dark-mode .bg-stone-100:hover { background-color: #3e3b38 !important; }
-        body.dark-mode input { background-color: #2d2b29 !important; color: #ffffff !important; border-color: #44413c !important; }
-        body.dark-mode input::placeholder { color: #78716c !important; }
-        body.dark-mode .border-amber-100, body.dark-mode .border-stone-100 { border-color: #3a3835 !important; }
-        body.dark-mode .bg-stone-200\/60 { background-color: #2d2b29 !important; }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clube de Choro - Consulta v8.4 CORRIGIDO TOKEN 269</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+.accordion-content{max-height:0;overflow:hidden;transition:max-height .3s}
+body.dark-mode{background:#161410 !important;color:#c7f9cc !important}
+body.dark-mode .bg-white{background:#23211e !important;color:#c7f9cc !important;border-color:#3a3835 !important}
+body.dark-mode .bg-amber-50\/40{background:#161410 !important}
+body.dark-mode .text-stone-800{color:#bbf7d0 !important}
+body.dark-mode .text-stone-700{color:#a7f3d0 !important}
+body.dark-mode .text-stone-600{color:#86efac !important}
+body.dark-mode .text-stone-500{color:#6ee7b7 !important}
+body.dark-mode .text-stone-400{color:#34d399 !important}
+body.dark-mode .text-emerald-800, body.dark-mode .text-emerald-900{color:#6ee7b7 !important}
+body.dark-mode .text-emerald-700{color:#34d399 !important}
+body.dark-mode .text-amber-700, body.dark-mode .text-amber-800, body.dark-mode .text-amber-900\/80{color:#fde68a !important}
+body.dark-mode .text-amber-950{color:#fef3c7 !important}
+body.dark-mode .bg-stone-100{background:#2e2c29 !important;color:#bbf7d0 !important}
+body.dark-mode .bg-stone-50, body.dark-mode .bg-stone-50\/50{background:#1f1d1a !important}
+body.dark-mode .bg-stone-200\/60{background:#2a2825 !important}
+body.dark-mode .bg-emerald-50{background:#1a2e1f !important;color:#6ee7b7 !important}
+body.dark-mode .bg-amber-50{background:#2e2612 !important;color:#fde68a !important}
+body.dark-mode .bg-emerald-50.to-amber-50, body.dark-mode .from-emerald-50{--tw-gradient-from:#1a2e1f !important; --tw-gradient-to:#2e2612 !important}
+body.dark-mode input, body.dark-mode select{background:#2a2825 !important;color:#bbf7d0 !important;border-color:#44403c !important}
+body.dark-mode input::placeholder{color:#6b7280 !important}
+body.dark-mode .border-stone-200, body.dark-mode .border-stone-100, body.dark-mode .border-amber-100, body.dark-mode .border-amber-200, body.dark-mode .border-emerald-200{border-color:#44403c !important}
+body.dark-mode .text-stone-900{color:#ecfdf5 !important}
+body.dark-mode h2, body.dark-mode h3{color:#6ee7b7 !important}
+</style>
 </head>
-<body id="body-app" class="bg-amber-50/40 text-stone-800 min-h-screen p-4 md:p-8 selection:bg-emerald-100 transition-colors duration-300">
-
-    <div class="max-w-4xl mx-auto">
-        <header class="relative text-center mb-10 transform hover:scale-102 transition-transform duration-300">
-            <button onclick="toggleDarkMode()" class="absolute right-2 top-2 p-2 rounded-full bg-stone-200/60 hover:bg-stone-200 dark:bg-stone-800 text-lg cursor-pointer transition" title="Alternar Modo Roda Noturna">
-                <span id="dark-mode-icon">🌙</span>
-            </button>
-            <span class="text-5xl">🎶</span>
-            <h1 class="text-4xl font-black text-emerald-800 dark:text-emerald-400 tracking-tight mt-2 drop-shadow-xs">Brasileirinho</h1>
-            <p class="text-amber-700/80 dark:text-amber-400/90 font-medium tracking-wide">Clube de Choro do Brasileirinho: Registro dos Encontros</p>
-        </header>
-
-        <div class="flex bg-stone-200/60 p-1.5 rounded-full mb-8 max-w-md mx-auto shadow-inner">
-            <button onclick="switchTab('consulta-tab')" id="btn-consulta" class="flex-1 py-2.5 px-4 rounded-full text-sm font-bold text-emerald-900 bg-white shadow-xs transition-all cursor-pointer tab-btn">
-                🔍 Encontros & Filtros
-            </button>
-            <button onclick="switchTab('dashboard-tab')" id="btn-dashboard" class="flex-1 py-2.5 px-4 rounded-full text-sm font-bold text-stone-600 hover:text-stone-400 transition-all cursor-pointer tab-btn">
-                📊 Painel & Estatísticas
-            </button>
-        </div>
-
-        <div id="consulta-tab" class="tab-content block space-y-6">
-            <div class="bg-white rounded-2xl shadow-md border border-amber-100 p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-black text-stone-800 flex items-center gap-2">🔍 Filtros Avançados</h2>
-                    <span id="badge-filtros" class="hidden text-xs bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 animate-pulse">
-                        Filtro Ativo
-                    </span>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="relative">
-                        <label class="block text-xs font-black text-stone-500 uppercase tracking-wider mb-1">Busca Geral</label>
-                        <input type="text" id="filtro-busca" oninput="aplicarFiltrosDebounced('filtro-busca')" placeholder="Nome, Choro ou Compositor..." class="w-full rounded-xl border-2 border-stone-200 p-2.5 text-sm outline-none focus:border-emerald-500 transition-all pr-8 bg-white dark:bg-stone-900">
-                        <button id="clear-filtro-busca" onclick="limparInput('filtro-busca')" class="absolute right-3 top-[32px] text-stone-400 hover:text-rose-500 hidden cursor-pointer transition-colors" title="Limpar busca">✖</button>
-                    </div>
-                    
-                    <div class="relative">
-                        <label class="block text-xs font-black text-stone-500 uppercase tracking-wider mb-1">Instrumento</label>
-                        <input type="text" id="filtro-instrumento" oninput="aplicarFiltrosDebounced('filtro-instrumento')" placeholder="Digite o nome do instrumento" class="w-full rounded-xl border-2 border-stone-200 p-2.5 text-sm outline-none focus:border-emerald-500 transition-all pr-8 bg-white dark:bg-stone-900">
-                        <button id="clear-filtro-instrumento" onclick="limparInput('filtro-instrumento')" class="absolute right-3 top-[32px] text-stone-400 hover:text-rose-500 hidden cursor-pointer transition-colors" title="Limpar instrumento">✖</button>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-xs font-black text-stone-500 uppercase tracking-wider mb-1">Intervalo de Datas</label>
-                        <div class="flex gap-2">
-                            <input type="date" id="filtro-data-inicio" onchange="aplicarFiltros()" class="w-full rounded-xl border-2 border-stone-200 p-2 text-xs outline-none focus:border-emerald-500 transition-all bg-white dark:bg-stone-900">
-                            <input type="date" id="filtro-data-fim" onchange="aplicarFiltros()" class="w-full rounded-xl border-2 border-stone-200 p-2 text-xs outline-none focus:border-emerald-500 transition-all bg-white dark:bg-stone-900">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex flex-wrap gap-2 mt-4 pt-3 border-t border-stone-100/60 items-center">
-                    <span class="text-[11px] font-black text-stone-400 uppercase tracking-wider">Atalhos:</span>
-                    <button onclick="aplicarChip('Percussão', 'inst')" class="text-xs bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 px-3 py-1 rounded-full font-bold transition hover:scale-105 cursor-pointer">🪘 Percussão</button>
-                    <button onclick="aplicarChip('Clarinete', 'inst')" class="text-xs bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 px-3 py-1 rounded-full font-bold transition hover:scale-105 cursor-pointer">🎷 Clarinete</button>
-                    <button onclick="aplicarChip('Flauta', 'inst')" class="text-xs bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 px-3 py-1 rounded-full font-bold transition hover:scale-105 cursor-pointer">🎵 Flauta</button>
-                    <button onclick="aplicarChip('Pixinguinha', 'busca')" class="text-xs bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300 px-3 py-1 rounded-full font-bold transition hover:scale-105 cursor-pointer">✍️ Pixinguinha</button>
-                </div>
-                
-                <div class="flex justify-between items-center mt-4 pt-2 border-t border-stone-100">
-                    <p id="texto-contador-registros" class="text-xs text-stone-500 font-medium">Iniciando ambiente...</p>
-                    <div class="flex gap-2">
-                        <button onclick="exportarParaCSV()" class="text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 py-1.5 px-4 rounded-full cursor-pointer transition">
-                            📥 Exportar Filtrados
-                        </button>
-                        <button onclick="limparFiltros()" class="text-xs font-bold text-rose-700 bg-rose-50 dark:bg-rose-950/40 py-1.5 px-4 rounded-full cursor-pointer transition">
-                            Limpar Filtros
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-md border border-amber-100 p-6">
-                <h2 class="text-xl font-black text-stone-800 mb-4 flex items-center gap-2">📜 Histórico dos Encontros:</h2>
-                <div id="historico-lista" class="space-y-3">
-                    <div class="animate-pulse space-y-3" id="main-skeleton">
-                        <div class="h-12 bg-stone-200/60 dark:bg-stone-800 rounded-xl w-full"></div>
-                        <div class="h-12 bg-stone-200/60 dark:bg-stone-800 rounded-xl w-full"></div>
-                        <div class="h-12 bg-stone-200/60 dark:bg-stone-800 rounded-xl w-full"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="dashboard-tab" class="tab-content hidden space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-emerald-800 text-emerald-50 p-5 rounded-2xl shadow-sm flex flex-col justify-between">
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold uppercase tracking-widest opacity-70">Resumo Geral</span>
-                        <span id="txt-filtro-aviso-dash" class="text-[10px] bg-emerald-900/60 text-emerald-200 font-bold px-2 py-0.5 rounded-md hidden">Visão Filtrada</span>
-                    </div>
-                    <div class="flex justify-between items-baseline mt-4">
-                        <div><p class="text-3xl font-black" id="dash-total-rodas">0</p><p class="text-xs opacity-80">Total de Rodas</p></div>
-                        <div><p class="text-3xl font-black" id="dash-total-musicos">0</p><p class="text-xs opacity-80">Musicistas</p></div>
-                        <div><p class="text-3xl font-black" id="dash-total-musicas">0</p><p class="text-xs opacity-80">Choros Tocados</p></div>
-                    </div>
-                </div>
-
-                <div class="bg-amber-500 text-amber-950 p-5 rounded-2xl shadow-sm flex flex-col justify-between">
-                    <span class="text-xs font-black uppercase tracking-widest text-amber-900/80">👑 Recorde de Presença</span>
-                    <div class="mt-4">
-                        <p class="text-xl font-black leading-tight" id="chart-val-pico-musicos">Calculando...</p>
-                        <p class="text-xs text-amber-900/70 mt-1">O encontro mais cheio no recorte selecionado.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex bg-stone-100 p-1 rounded-xl max-w-xs mx-auto justify-between shadow-xs">
-                <button onclick="alternarSubVisaoDash('mini')" id="sub-btn-mini" class="flex-1 py-1.5 px-3 text-xs font-black rounded-lg transition-all bg-white text-emerald-950 shadow-2xs cursor-pointer">
-                    📋 Visão Rápida
-                </button>
-                <button onclick="alternarSubVisaoDash('avancada')" id="sub-btn-avancada" class="flex-1 py-1.5 px-3 text-xs font-bold rounded-lg transition-all text-stone-500 hover:text-stone-400 cursor-pointer">
-                    📈 Gráficos Avançados
-                </button>
-            </div>
-
-            <div id="dash-visao-mini" class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white p-6 rounded-2xl shadow-sm border border-amber-100">
-                <div class="space-y-4">
-                    <h3 class="font-black text-sm text-emerald-900 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1">🎵 Mais Tocadas</h3>
-                    <div id="ranking-musicas" class="space-y-3"></div>
-                </div>
-                <div class="space-y-4">
-                    <h3 class="font-black text-sm text-amber-800 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1">✍️ Compositores</h3>
-                    <div id="ranking-compositores" class="space-y-3"></div>
-                </div>
-                <div class="space-y-4">
-                    <h3 class="font-black text-sm text-stone-700 dark:text-stone-300 uppercase tracking-wider flex items-center gap-1">👥 Dias mais Cheios</h3>
-                    <div id="ranking-dias-cheios" class="space-y-3"></div>
-                </div>
-            </div>
-
-            <div id="dash-visao-avancada" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-100 h-80 flex flex-col">
-                    <h4 class="text-xs font-black text-stone-500 uppercase tracking-wider mb-2">📈 Evolução de Presença nas Rodas</h4>
-                    <div class="relative flex-1"><canvas id="chart-evolucao-presenca"></canvas></div>
-                </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-100 h-80 flex flex-col">
-                    <h4 class="text-xs font-black text-stone-500 uppercase tracking-wider mb-2">🎵 Top 10 Choros Mais Executados</h4>
-                    <div class="relative flex-1"><canvas id="chart-top-musicas"></canvas></div>
-                </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-100 h-80 flex flex-col">
-                    <h4 class="text-xs font-black text-stone-500 uppercase tracking-wider mb-2">✍️ Top 10 Compositores do Repertório</h4>
-                    <div class="relative flex-1"><canvas id="chart-top-compositores"></canvas></div>
-                </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-100 h-80 flex flex-col">
-                    <h4 class="text-xs font-black text-stone-500 uppercase tracking-wider mb-2">🎷 Mix de Instrumentos Identificados</h4>
-                    <div class="relative flex-1"><canvas id="chart-mix-instrumentos"></canvas></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzPIbyianh-eI0SMVW1Xj4Qcf6dpYwDIJ_isycG8_FooXVI53Cz4Mo2e9r9VYAORkFJow/exec";
-
-        let todosOsEncontros = [];
-        let encontrosFiltradosGlobais = [];
-        let instanciasGraficos = {};
-
-        function removerAcentos(str) {
-            if (!str) return "";
-            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+<body id="body-app" class="bg-amber-50/40 text-stone-800 min-h-screen p-4 md:p-8">
+<div class="max-w-4xl mx-auto">
+<header class="relative text-center mb-10">
+<button id="btn-dark" class="absolute right-2 top-2 p-2 rounded-full bg-stone-200/60 hover:bg-stone-200 text-lg cursor-pointer">Lua</button>
+<span class="text-5xl">Musica</span>
+<h1 class="text-4xl font-black text-emerald-800 tracking-tight mt-2">Brasileirinho</h1>
+<p class="text-amber-700/80 font-medium">Consulta v8.4 - corrigido erro linha 269</p>
+</header>
+<div class="flex bg-stone-200/60 p-1.5 rounded-full mb-8 max-w-md mx-auto">
+<button id="btn-consulta" class="flex-1 py-2.5 px-4 rounded-full text-sm font-bold text-emerald-900 bg-white shadow-xs cursor-pointer">Encontros</button>
+<button id="btn-dashboard" class="flex-1 py-2.5 px-4 rounded-full text-sm font-bold text-stone-600 cursor-pointer">Painel</button>
+</div>
+<div id="consulta-tab" class="space-y-6">
+<div class="bg-white rounded-2xl shadow-md border border-amber-100 p-5 md:p-6">
+<div class="flex justify-between items-center mb-4">
+<div class="flex items-center gap-3"><h2 class="text-xl font-black text-stone-800">Filtros</h2><span id="badge-filtros" class="hidden text-[11px] bg-emerald-500 text-white font-black px-3 py-1 rounded-full animate-pulse">Filtro Ativo • ESC para limpar</span></div>
+<div class="flex items-center gap-2"><span class="text-[10px] text-stone-400 hidden md:block">Pressione <kbd class="bg-stone-100 px-1.5 py-0.5 rounded text-[10px] border">/</kbd> para buscar</span></div>
+</div>
+<div class="flex flex-col md:flex-row gap-3">
+<div class="relative flex-1"><label class="block text-[11px] font-black text-stone-500 uppercase mb-1.5 tracking-wider">Busca Geral • Choro, Compositor ou Musicista</label><div class="relative"><span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400">🔍</span><input type="text" id="filtro-busca" placeholder="Ex: Doce de Coco, Pixinguinha, Cavaquinho..." class="w-full rounded-xl border-2 border-stone-200 p-2.5 pl-10 pr-9 text-sm outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all bg-white"><button id="clear-filtro-busca" class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 hidden w-6 h-6 rounded-full bg-stone-100 flex items-center justify-center text-xs">✕</button></div></div>
+<div class="relative md:w-72"><label class="block text-[11px] font-black text-stone-500 uppercase mb-1.5 tracking-wider">Instrumento</label><div class="relative"><span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400">🎸</span><input type="text" id="filtro-instrumento" placeholder="Ex: Pandeiro, Violão..." class="w-full rounded-xl border-2 border-stone-200 p-2.5 pl-10 pr-9 text-sm outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 transition-all bg-white"><button id="clear-filtro-instrumento" class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 hidden w-6 h-6 rounded-full bg-stone-100 flex items-center justify-center text-xs">✕</button></div></div>
+</div>
+<div class="flex flex-wrap gap-2 mt-4 pt-3 border-t border-stone-100 items-center">
+<span class="text-[11px] font-black text-stone-400 uppercase tracking-wider">Atalhos rápidos • Clique para filtrar:</span>
+<button class="chip text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-800 px-3.5 py-1.5 rounded-full font-bold border border-emerald-200 transition-colors" data-chip="Percussao" data-tipo="inst">🥁 Percussão</button>
+<button class="chip text-xs bg-stone-100 hover:bg-stone-200 px-3.5 py-1.5 rounded-full font-bold border border-stone-200 transition-colors" data-chip="Cavaquinho" data-tipo="inst">Cavaquinho</button>
+<button class="chip text-xs bg-stone-100 hover:bg-stone-200 px-3.5 py-1.5 rounded-full font-bold border border-stone-200 transition-colors" data-chip="Violao" data-tipo="inst">Violão</button>
+<button class="chip text-xs bg-stone-100 hover:bg-stone-200 px-3.5 py-1.5 rounded-full font-bold border border-stone-200 transition-colors" data-chip="Clarinete" data-tipo="inst">Clarinete</button>
+<button class="chip text-xs bg-stone-100 hover:bg-stone-200 px-3.5 py-1.5 rounded-full font-bold border border-stone-200 transition-colors" data-chip="Flauta" data-tipo="inst">Flauta</button>
+<button class="chip text-xs bg-stone-100 hover:bg-stone-200 px-3.5 py-1.5 rounded-full font-bold border border-stone-200 transition-colors" data-chip="Bandolim" data-tipo="inst">Bandolim</button>
+<button class="chip text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 px-3.5 py-1.5 rounded-full font-bold border border-amber-200 transition-colors" data-chip="Pixinguinha" data-tipo="busca">Pixinguinha</button>
+<button class="chip text-xs bg-amber-50 hover:bg-amber-100 text-amber-800 px-3.5 py-1.5 rounded-full font-bold border border-amber-200 transition-colors" data-chip="Jacob" data-tipo="busca">Jacob do Bandolim</button>
+</div>
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mt-4 pt-3 border-t border-stone-100 bg-stone-50/50 -mx-5 md:-mx-6 -mb-5 md:-mb-6 p-3 md:p-4 rounded-b-2xl">
+<div class="flex flex-col gap-1"><p id="texto-contador-registros" class="text-sm font-bold text-stone-700">Iniciando v8.4 corrigido...</p><p id="debug-info" class="text-[11px] text-stone-600 font-medium tracking-wide"></p></div>
+<div class="flex gap-2"><button id="btnExport" class="text-xs font-black text-white bg-emerald-600 hover:bg-emerald-700 py-2 px-5 rounded-full shadow-sm transition-colors">⬇ Exportar CSV</button><button id="btnLimpar" class="text-xs font-black text-stone-600 bg-white hover:bg-stone-100 border border-stone-200 py-2 px-5 rounded-full shadow-sm transition-colors">✕ Limpar Filtros</button></div>
+</div>
+<div id="erro-box" class="hidden mt-3 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-[11px]"></div>
+</div>
+<div class="bg-white rounded-2xl shadow-md border border-amber-100 p-6">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
+<h2 class="text-xl font-black text-stone-800">Histórico dos Encontros</h2>
+<div class="flex flex-wrap gap-2 items-center">
+<button id="btn-historico-geral" class="text-xs font-black bg-stone-800 text-white px-4 py-2.5 rounded-full hover:bg-stone-700 transition-colors shadow-sm">📜 Histórico Geral</button>
+<div class="relative"><select id="filtro-quinta" class="text-xs font-bold border-2 border-stone-200 rounded-full px-4 py-2.5 bg-white outline-none focus:border-emerald-500 appearance-none pr-8"><option value="">📅 Filtrar por Quinta...</option></select><span class="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 pointer-events-none text-[10px]">▼</span></div>
+<button id="btn-expandir-todos" class="hidden text-xs font-bold bg-stone-100 hover:bg-stone-200 px-4 py-2.5 rounded-full border">⬇ Expandir todos</button>
+<button id="btn-recolher-todos" class="hidden text-xs font-bold bg-stone-100 hover:bg-stone-200 px-4 py-2.5 rounded-full border">⬆ Recolher</button>
+</div>
+</div>
+<div id="resumo-pesquisa" class="hidden mb-4 p-4 bg-gradient-to-r from-emerald-50 via-white to-amber-50 rounded-xl border border-emerald-100 shadow-sm"></div>
+<div id="historico-lista" class="hidden space-y-3">
+<div id="main-skeleton" class="animate-pulse space-y-3"><div class="h-12 bg-stone-200/60 rounded-xl w-full"></div><div class="h-12 bg-stone-200/60 rounded-xl w-full"></div><div class="h-12 bg-stone-200/60 rounded-xl w-full"></div></div>
+</div>
+<div id="historico-vazio" class="text-center py-12 bg-stone-50/50 rounded-xl border border-dashed"><p class="text-sm font-bold text-stone-600">🔍 Use a busca acima ou clique em <strong class="text-stone-800">Histórico Geral</strong> para ver todas as rodas</p><p class="text-[11px] text-stone-400 mt-2">💡 Dica: Encontros sempre às quintas-feiras • Clique nos gráficos para filtrar • Clique no nome do musicista para ver participações</p><div class="flex justify-center gap-2 mt-4"><span class="text-[10px] bg-white px-3 py-1 rounded-full border">32 rodas cadastradas</span><span class="text-[10px] bg-white px-3 py-1 rounded-full border">Quintas-feiras</span><span class="text-[10px] bg-white px-3 py-1 rounded-full border">Choro do Brasileirinho</span></div></div>
+</div>
+</div>
+<div id="dashboard-tab" class="hidden space-y-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="bg-emerald-800 text-emerald-50 p-5 rounded-2xl flex flex-col justify-between"><div class="flex justify-between items-center"><span class="text-xs font-bold uppercase tracking-widest opacity-70">Resumo Geral</span><span id="txt-filtro-aviso-dash" class="text-[10px] bg-emerald-900/60 text-emerald-200 font-bold px-2 py-0.5 rounded-md hidden">Visao Filtrada</span></div><div class="flex justify-between items-baseline mt-4"><div><p class="text-3xl font-black" id="dash-total-rodas">0</p><p class="text-xs opacity-80">Total de Rodas</p></div><div><p class="text-3xl font-black" id="dash-total-musicos">0</p><p class="text-xs opacity-80">Musicistas</p></div><div><p class="text-3xl font-black" id="dash-total-musicas">0</p><p class="text-xs opacity-80">Choros</p></div></div></div>
+<div class="bg-amber-500 text-amber-950 p-5 rounded-2xl flex flex-col justify-between"><span class="text-xs font-black uppercase text-amber-900/80">Recorde de Presenca</span><div class="mt-4"><p class="text-xl font-black leading-tight" id="chart-val-pico-musicos">Calculando...</p></div></div>
+</div>
+<div class="flex bg-stone-100 p-1 rounded-xl max-w-xs mx-auto justify-between"><button id="sub-btn-mini" class="flex-1 py-1.5 px-3 text-xs font-black rounded-lg bg-white text-emerald-950 shadow-2xs">Visao Rapida</button><button id="sub-btn-avancada" class="flex-1 py-1.5 px-3 text-xs font-bold rounded-lg text-stone-500">Graficos</button></div>
+<div id="dash-visao-mini" class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white p-6 rounded-2xl border border-amber-100"><div class="space-y-4"><h3 class="font-black text-sm text-emerald-900 uppercase">Mais Tocadas</h3><div id="ranking-musicas" class="space-y-3"></div></div><div class="space-y-4"><h3 class="font-black text-sm text-amber-800 uppercase">Compositores</h3><div id="ranking-compositores" class="space-y-3"></div></div><div class="space-y-4"><h3 class="font-black text-sm text-stone-700 uppercase">Dias mais Cheios</h3><div id="ranking-dias-cheios" class="space-y-3"></div></div></div>
+<div id="dash-visao-avancada" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6"><div class="bg-white p-5 rounded-2xl border border-stone-100 h-80 flex flex-col"><h4 class="text-xs font-black text-stone-500 uppercase mb-2">Evolucao</h4><div class="relative flex-1"><canvas id="chart-evolucao-presenca"></canvas></div></div><div class="bg-white p-5 rounded-2xl border border-stone-100 h-80 flex flex-col"><h4 class="text-xs font-black text-stone-500 uppercase mb-2">Top 10 Choros</h4><div class="relative flex-1"><canvas id="chart-top-musicas"></canvas></div></div><div class="bg-white p-5 rounded-2xl border border-stone-100 h-80 flex flex-col"><h4 class="text-xs font-black text-stone-500 uppercase mb-2">Top 10 Compositores</h4><div class="relative flex-1"><canvas id="chart-top-compositores"></canvas></div></div><div class="bg-white p-5 rounded-2xl border border-stone-100 h-80 flex flex-col"><h4 class="text-xs font-black text-stone-500 uppercase mb-2">Mix Instrumentos</h4><div class="relative flex-1"><canvas id="chart-mix-instrumentos"></canvas></div></div></div>
+</div>
+</div>
+<script>
+// BASEADO NO SEU ADMIN v8.4 - SEM CARACTERES ESPECIAIS QUE QUEBRAVAM LINHA 269
+const SUPABASE_URL = "https://tligeoszfzifgqxymoyn.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Cs4IiSM3v_QE1ihCXaXFkw_0g-WyMf_";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+function escapeHtml(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escapeAttr(s){ return escapeHtml(s).replace(/`/g,'&#96;'); }
+const normalizaCache = new Map();
+function normaliza(txt){
+  if(!txt) return "";
+  if(normalizaCache.has(txt)) return normalizaCache.get(txt);
+  var n = txt.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s+(de|da|do|dos|das|e|na|no|nas|nos|num|numa|com|sem|para|pra)\s+/gi," ").trim().replace(/\s+/g," ");
+  if(normalizaCache.size>5000){ var firstKey=normalizaCache.keys().next().value; normalizaCache.delete(firstKey); }
+  normalizaCache.set(txt, n);
+  return n;
+}
+function removerAcentos(s){ return normaliza(s); }
+var todosOsEncontros = [];
+var encontrosFiltradosGlobais = [];
+var instanciasGraficos = {};
+var debounceTimer = null;
+var cache = { encontros:[], musicos:[], instrumentos:[], musicas:[], compositores:[], encontro_musicos:[], encontro_repertorio:[] };
+function limparDataHistorico(s){
+  if(!s) return "Sem data";
+  if(s.indexOf('T')>-1 && s.indexOf('/')>-1){ var p=s.split('/'); return p[0].split('T')[0].padStart(2,'0')+'/'+p[1].padStart(2,'0')+'/'+p[2]; }
+  if(s.indexOf('-')>-1){ var p=s.split('T')[0].split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+  return s;
+}
+function toggleDarkMode(){
+  var body=document.getElementById('body-app');
+  var btn=document.getElementById('btn-dark');
+  if(!body) return;
+  body.classList.toggle('dark-mode');
+  var isDark=body.classList.contains('dark-mode');
+  if(btn) btn.textContent=isDark ? 'Sol' : 'Lua';
+  try{ localStorage.setItem('brasileirinho_theme', isDark ? 'dark' : 'light'); }catch(e){}
+}
+function switchTab(tabId){
+  document.getElementById('consulta-tab').classList.toggle('hidden', tabId!=='consulta-tab');
+  document.getElementById('dashboard-tab').classList.toggle('hidden', tabId!=='dashboard-tab');
+  var btnC=document.getElementById('btn-consulta');
+  var btnD=document.getElementById('btn-dashboard');
+  if(tabId==='consulta-tab'){ btnC.className="flex-1 py-2.5 px-4 rounded-full text-sm font-bold text-emerald-900 bg-white shadow-xs cursor-pointer"; btnD.className="flex-1 py-2.5 px-4 rounded-full text-sm font-bold text-stone-600 cursor-pointer"; }
+  else { btnC.className="flex-1 py-2.5 px-4 rounded-full text-sm font-bold text-stone-600 cursor-pointer"; btnD.className="flex-1 py-2.5 px-4 rounded-full text-sm font-bold text-emerald-900 bg-white shadow-xs cursor-pointer"; if(encontrosFiltradosGlobais.length>0) setTimeout(function(){ atualizarPainelEstatisticas(encontrosFiltradosGlobais); },80); }
+}
+function alternarSubVisaoDash(v){
+  var mini=document.getElementById('dash-visao-mini'); var av=document.getElementById('dash-visao-avancada');
+  var bMini=document.getElementById('sub-btn-mini'); var bAv=document.getElementById('sub-btn-avancada');
+  if(v==='mini'){ mini.classList.remove('hidden'); av.classList.add('hidden'); bMini.className="flex-1 py-1.5 px-3 text-xs font-black rounded-lg bg-white text-emerald-950 shadow-2xs cursor-pointer"; bAv.className="flex-1 py-1.5 px-3 text-xs font-bold rounded-lg text-stone-500 cursor-pointer"; }
+  else{ mini.classList.add('hidden'); av.classList.remove('hidden'); bMini.className="flex-1 py-1.5 px-3 text-xs font-bold rounded-lg text-stone-500 cursor-pointer"; bAv.className="flex-1 py-1.5 px-3 text-xs font-black rounded-lg bg-white text-emerald-950 shadow-2xs cursor-pointer"; setTimeout(function(){ atualizarPainelEstatisticas(encontrosFiltradosGlobais); },120); }
+}
+function aplicarFiltrosDebounced(id){
+  var v=document.getElementById(id).value;
+  var b=document.getElementById('clear-'+id);
+  if(v.length>0) b.classList.remove('hidden'); else b.classList.add('hidden');
+  clearTimeout(debounceTimer);
+  debounceTimer=setTimeout(function(){ aplicarFiltros(); },300);
+}
+function limparInput(id){ document.getElementById(id).value=''; document.getElementById('clear-'+id).classList.add('hidden'); aplicarFiltros(); }
+function aplicarChip(valor,tipo){
+  if(tipo==='inst'){ document.getElementById('filtro-instrumento').value=valor; document.getElementById('clear-filtro-instrumento').classList.remove('hidden'); }
+  else{ document.getElementById('filtro-busca').value=valor; document.getElementById('clear-filtro-busca').classList.remove('hidden'); }
+  aplicarFiltros();
+}
+function filtrarPorMusico(nome){ document.getElementById('filtro-busca').value=nome; document.getElementById('clear-filtro-busca').classList.remove('hidden'); switchTab('consulta-tab'); aplicarFiltros(); window.scrollTo({top:150, behavior:'smooth'}); }
+async function loadAllPaginated(table, select){
+  var all=[]; var from=0; var step=1000;
+  while(true){
+    var res = await supabaseClient.from(table).select(select).range(from, from+step-1);
+    if(res.error){
+      console.error('Erro', table, res.error);
+      throw res.error;
+    }
+    if(!res.data || res.data.length===0) break;
+    all=all.concat(res.data);
+    if(res.data.length < step) break;
+    from+=step;
+    if(all.length>20000) break;
+  }
+  return all;
+}
+async function buscarDadosSupabase(){
+  var txt=document.getElementById('texto-contador-registros');
+  var dbg=document.getElementById('debug-info');
+  var errBox=document.getElementById('erro-box');
+  var sk=document.getElementById('main-skeleton');
+  txt.textContent='Carregando (v8.4 corrigido token 269)...';
+  if(errBox) errBox.classList.add('hidden');
+  var start=performance.now();
+  try{
+    var results = await Promise.all([
+      loadAllPaginated('encontros','id,numero,data,observacoes'),
+      loadAllPaginated('musicos','id,nome'),
+      loadAllPaginated('instrumentos','id,nome'),
+      loadAllPaginated('musicas','id,titulo,compositor_id'),
+      loadAllPaginated('compositores','id,nome'),
+      loadAllPaginated('encontro_musicos','encontro_id,musico_id,instrumento_id'),
+      loadAllPaginated('encontro_repertorio','encontro_id,musica_id')
+    ]);
+    cache.encontros = results[0];
+    cache.musicos = results[1];
+    cache.instrumentos = results[2];
+    cache.musicas = results[3];
+    cache.compositores = results[4];
+    cache.encontro_musicos = results[5];
+    cache.encontro_repertorio = results[6];
+    var mapMusico={}; cache.musicos.forEach(function(m){ mapMusico[m.id]=m.nome; });
+    var mapInst={}; cache.instrumentos.forEach(function(i){ mapInst[i.id]=i.nome; });
+    var mapMusica={}; cache.musicas.forEach(function(m){ mapMusica[m.id]=m; });
+    var mapComp={}; cache.compositores.forEach(function(c){ mapComp[c.id]=c.nome; });
+    var porEncM={}; cache.encontro_musicos.forEach(function(x){ if(!porEncM[x.encontro_id]) porEncM[x.encontro_id]=[]; porEncM[x.encontro_id].push({nome:mapMusico[x.musico_id]||'', inst:mapInst[x.instrumento_id]||''}); });
+    var porEncR={}; cache.encontro_repertorio.forEach(function(x){ var mu=mapMusica[x.musica_id]; if(!mu) return; if(!porEncR[x.encontro_id]) porEncR[x.encontro_id]=[]; porEncR[x.encontro_id].push({titulo:mu.titulo, comp:mapComp[mu.compositor_id]||''}); });
+    todosOsEncontros = cache.encontros.map(function(e){
+      var lm=porEncM[e.id]||[]; var lr=porEncR[e.id]||[];
+      return {
+        encontroNumero:e.numero,
+        data:e.data||'',
+        observacoes:e.observacoes||'',
+        musicosNomes:lm.map(function(v){return v.nome;}).filter(function(b){return b;}).join(' | '),
+        musicosInst:lm.map(function(v){return v.inst;}).filter(function(b){return b;}).join(' | '),
+        repMusicas:lr.map(function(v){return v.titulo;}).filter(function(b){return b;}).join(' | '),
+        repComps:lr.map(function(v){return v.comp;}).filter(function(b){return b;}).join(' | ')
+      };
+    }).sort(function(a,b){ return (b.encontroNumero||0)-(a.encontroNumero||0); });
+    var end=performance.now();
+    if(dbg) dbg.textContent=cache.encontros.length+' rodas • '+cache.encontro_musicos.length+' participações de musicistas • '+cache.encontro_repertorio.length+' choros tocados';
+    if(sk) sk.remove();
+    try{ localStorage.setItem('brasileirinho_data_cache', JSON.stringify(todosOsEncontros)); }catch(e){}
+    // Otimizacao: popular filtro de quintas (só quintas-feiras)
+    popularFiltroQuintas();
+    var btnHG=document.getElementById('btn-historico-geral'); if(btnHG) btnHG.textContent='📜 Histórico Geral ('+todosOsEncontros.length+')';
+    processarCargaInicial();
+    txt.textContent=todosOsEncontros.length+' encontros carregados';
+  } catch(err){
+    console.error(err);
+    txt.textContent='Erro: '+err.message;
+    if(errBox){ errBox.classList.remove('hidden'); errBox.textContent='Erro: '+err.message; }
+    if(sk) sk.innerHTML='<div class="text-center py-6 text-sm text-rose-600">Erro: '+escapeHtml(err.message)+'</div>';
+  }
+}
+function renderizarHistorico(rodas,buscaOriginal,instrumentoOriginal){
+  if(!buscaOriginal) buscaOriginal=''; if(!instrumentoOriginal) instrumentoOriginal='';
+  var container=document.getElementById('historico-lista');
+  if(!rodas || rodas.length===0){ container.innerHTML='<div class="text-center py-10 bg-stone-50 rounded-xl border border-dashed"><h3 class="text-lg font-black text-stone-700 mb-1">Nenhum choro encontrado!</h3><button onclick="limparFiltros()" class="bg-emerald-100 text-emerald-800 px-5 py-2.5 rounded-full font-bold text-sm">Limpar Filtros</button></div>'; return; }
+  container.innerHTML='';
+  var buscaNorm=normaliza(buscaOriginal); var instNorm=normaliza(instrumentoOriginal);
+  rodas.forEach(function(r){
+    var nomes=r.musicosNomes ? r.musicosNomes.split(' | ') : []; var insts=r.musicosInst ? r.musicosInst.split(' | ') : []; var musicas=r.repMusicas ? r.repMusicas.split(' | ') : []; var comps=r.repComps ? r.repComps.split(' | ') : [];
+    // ORDEM A-Z - musicos
+    var musicosCombined=[];
+    for(var i=0;i<nomes.length;i++){ if(nomes[i].trim()) musicosCombined.push({nome: nomes[i].trim(), inst: (insts[i]||'?').trim()}); }
+    musicosCombined.sort(function(a,b){ return normaliza(a.nome).localeCompare(normaliza(b.nome)); });
+    var musicosHtml=[];
+    var buscaEhNome=buscaNorm ? nomes.some(function(n){ return normaliza(n).indexOf(buscaNorm)>-1; }) : false;
+    var buscaEhRepertorio=buscaNorm ? musicas.concat(comps).some(function(m){ return normaliza(m).indexOf(buscaNorm)>-1; }) : false;
+    for(var i=0;i<musicosCombined.length;i++){
+      var n=musicosCombined[i].nome; var inst=musicosCombined[i].inst;
+      var str=normaliza(n+' '+inst);
+      // Se busca for por nome de compositor ou repertorio, NAO ocultar musicistas
+      var okBusca=buscaNorm ? (str.indexOf(buscaNorm)>-1 || buscaEhRepertorio) : true;
+      var okInst=instNorm ? normaliza(inst).indexOf(instNorm)>-1 : true;
+      if(okBusca && okInst){
+        musicosHtml.push('<li>• <span class="musico-link cursor-pointer hover:text-emerald-600 hover:underline font-semibold" data-nome="'+escapeAttr(n)+'">'+escapeHtml(n)+'</span> <span class="text-stone-400 text-xs">('+escapeHtml(inst)+')</span></li>');
+      }
+    }
+    if(musicosHtml.length===0 && nomes.length>0) musicosHtml.push('<li><span class="text-stone-400 text-[11px] italic">outros ocultados</span></li>');
+    var musicasHtml=[];
+    // ORDEM A-Z - choros
+    var musicasCombined=[];
+    for(var j=0;j<musicas.length;j++){ if(musicas[j].trim()) musicasCombined.push({titulo: musicas[j].trim(), comp: (comps[j]||'Dominio Publico').trim()}); }
+    musicasCombined.sort(function(a,b){ return normaliza(a.titulo).localeCompare(normaliza(b.titulo)); });
+    for(var j=0;j<musicasCombined.length;j++){
+      var m=musicasCombined[j].titulo; var comp=musicasCombined[j].comp;
+      var str2=normaliza(m+' '+comp);
+      var ok=buscaEhNome ? true : (buscaNorm ? str2.indexOf(buscaNorm)>-1 : true);
+      if(ok){
+        var link='https://music.youtube.com/search?q='+encodeURIComponent(m.trim()+' '+comp.trim());
+        musicasHtml.push('<li>• <a href="'+link+'" target="_blank" class="hover:text-emerald-700 hover:underline inline-flex items-center gap-1">"'+escapeHtml(m)+'" <span class="text-[10px] bg-red-600 text-white px-1.5 py-0.5 rounded-full">YT Music</span></a> <span class="text-stone-400 text-xs">- '+escapeHtml(comp)+'</span></li>');
+      }
+    }
+    if(musicasHtml.length===0 && musicas.length>0) musicasHtml.push('<li><span class="text-stone-400 text-[11px] italic">repertorio ocultado</span></li>');
+    var btn=document.createElement('button');
+    btn.className="w-full text-left font-bold text-stone-700 bg-stone-100 hover:bg-stone-200 p-3.5 rounded-xl flex justify-between items-center";
+    btn.textContent='Encontro #'+r.encontroNumero+' - '+limparDataHistorico(r.data);
+    var span=document.createElement('span');
+    span.className="text-xs bg-white text-stone-500 px-2 py-1 rounded-md";
+    span.textContent='Ver';
+    btn.appendChild(span);
+    var panel=document.createElement('div');
+    panel.className="accordion-content bg-white border-x border-b border-stone-100 rounded-b-xl px-4";
+    var obsHtml=r.observacoes ? '<div class="bg-stone-50 p-2.5 rounded-lg text-xs"><strong>Nota:</strong> '+escapeHtml(r.observacoes)+'</div>' : '';
+    panel.innerHTML='<div class="py-4 text-sm space-y-3"><div class="grid grid-cols-1 md:grid-cols-2 gap-3"><div><strong class="text-emerald-800 text-xs uppercase block mb-1">Musicistas</strong><ul class="space-y-1 text-stone-600">'+musicosHtml.join('')+'</ul></div><div><strong class="text-amber-700 text-xs uppercase block mb-1">Choros Tocados</strong><ul class="space-y-1 text-stone-600">'+musicasHtml.join('')+'</ul></div></div>'+obsHtml+'</div>';
+    btn.addEventListener('click', function(){ if(panel.style.maxHeight) panel.style.maxHeight=null; else panel.style.maxHeight=panel.scrollHeight+"px"; });
+    container.appendChild(btn);
+    container.appendChild(panel);
+  });
+  var links=container.querySelectorAll('.musico-link');
+  for(var k=0;k<links.length;k++){
+    links[k].addEventListener('click', function(){ filtrarPorMusico(this.getAttribute('data-nome')); });
+  }
+  // Otimizador: atualizar botoes expandir/recolher visibilidade
+  var btnExp=document.getElementById('btn-expandir-todos'); var btnRec=document.getElementById('btn-recolher-todos');
+  if(rodas.length>0){ if(btnExp) btnExp.classList.remove('hidden'); } else { if(btnExp) btnExp.classList.add('hidden'); if(btnRec) btnRec.classList.add('hidden'); }
+}
+function gerarResumoPesquisa(buscaOriginal, listaFiltrada){
+  var resumoEl=document.getElementById('resumo-pesquisa');
+  if(!resumoEl) return;
+  if(!buscaOriginal || listaFiltrada.length===0 || listaFiltrada.length===todosOsEncontros.length){
+    resumoEl.classList.add('hidden');
+    resumoEl.innerHTML='';
+    return;
+  }
+  var buscaNorm=normaliza(buscaOriginal);
+  var totalRodas=listaFiltrada.length;
+  var rodasNumeros=[]; var datasObjs=[];
+  var musicosSetTodos=new Set();
+  var instrumentosTodos={};
+  var totalChorosTodos=0;
+  var composTodos={};
+  var matchingMusicistas=new Set();
+  var matchingInstrumentos={};
+  var matchingChoros=new Set();
+  var matchingChorosCount=0;
+  var matchingCompos={};
+  var isMusicista=false;
+  var isInstrumento=false;
+  var isRepertorio=false;
+  listaFiltrada.forEach(function(r){
+    rodasNumeros.push(r.encontroNumero);
+    if(r.data){
+      var fmt=r.data.split('T')[0];
+      datasObjs.push({fmt:fmt, display:limparDataHistorico(r.data)});
+    }
+    var nomes=r.musicosNomes ? r.musicosNomes.split(' | ') : [];
+    var insts=r.musicosInst ? r.musicosInst.split(' | ') : [];
+    var musicas=r.repMusicas ? r.repMusicas.split(' | ') : [];
+    var comps=r.repComps ? r.repComps.split(' | ') : [];
+    nomes.forEach(function(n){ if(n.trim()) musicosSetTodos.add(n.trim()); });
+    insts.forEach(function(ins){ if(ins.trim()) instrumentosTodos[ins.trim()]=(instrumentosTodos[ins.trim()]||0)+1; });
+    musicas.forEach(function(m,i){
+      if(m.trim()){
+        totalChorosTodos++;
+        var comp=comps[i]||'';
+        if(comp) composTodos[comp]=(composTodos[comp]||0)+1;
+      }
+    });
+    // Verifica se busca é musicista
+    nomes.forEach(function(n,i){
+      if(normaliza(n).indexOf(buscaNorm)>-1){
+        isMusicista=true;
+        matchingMusicistas.add(n.trim());
+        var inst=insts[i] ? insts[i].trim() : '';
+        if(inst) matchingInstrumentos[inst]=(matchingInstrumentos[inst]||0)+1;
+      }
+    });
+    // Verifica se busca é instrumento
+    insts.forEach(function(ins){
+      if(normaliza(ins).indexOf(buscaNorm)>-1){
+        isInstrumento=true;
+      }
+    });
+    // Verifica se busca é repertorio/compositor
+    musicas.forEach(function(m,i){
+      var comp=comps[i]||'';
+      var str=normaliza(m+' '+comp);
+      if(str.indexOf(buscaNorm)>-1){
+        isRepertorio=true;
+        matchingChoros.add(m.trim());
+        matchingChorosCount++;
+        if(comp) matchingCompos[comp]=(matchingCompos[comp]||0)+1;
+      }
+    });
+  });
+  // Ordena datas corretamente (antiga -> nova)
+  datasObjs.sort(function(a,b){ return a.fmt.localeCompare(b.fmt); });
+  var datasDisplay=datasObjs.map(function(d){ return d.display; });
+  rodasNumeros.sort(function(a,b){ return a-b; });
+  var rodasStr=rodasNumeros.slice(0,5).map(function(n){ return '#'+n; }).join(', ')+(rodasNumeros.length>5 ? ' +'+(rodasNumeros.length-5) : '');
+  var html='<div class="flex flex-col md:flex-row justify-between gap-3"><div class="flex-1"><p class="text-sm font-black text-emerald-800">📊 Resumo para "'+escapeHtml(buscaOriginal)+'"</p><div class="mt-2 grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">';
+  if(isMusicista && !isRepertorio){
+    // Busca por MUSICISTA - RESULTADOS MAIS ÚTEIS (substitui Participações, Choros nas Rodas, Período)
+    var totalParticMusicista=0;
+    Object.values(matchingInstrumentos).forEach(function(c){ totalParticMusicista+=c; });
+    var topInstMusicista=Object.entries(matchingInstrumentos).sort(function(a,b){return b[1]-a[1];}).slice(0,3).map(function(e){return e[0]+' ('+e[1]+'x)';}).join(', ');
+    // Calcula parceiros frequentes e repertório nas rodas dele
+    var parceirosFreq={}; var chorosFreq={}; var totalParticTodos=0;
+    listaFiltrada.forEach(function(r){
+      var nomes=r.musicosNomes ? r.musicosNomes.split(' | ') : [];
+      var musicas=r.repMusicas ? r.repMusicas.split(' | ') : [];
+      totalParticTodos+=nomes.filter(function(n){return n.trim();}).length;
+      nomes.forEach(function(n){
+        if(n.trim() && normaliza(n).indexOf(buscaNorm)===-1){
+          parceirosFreq[n.trim()]=(parceirosFreq[n.trim()]||0)+1;
         }
-
-        let debounceTimer;
-        function aplicarFiltrosDebounced(inputId) {
-            const inputVal = document.getElementById(inputId).value;
-            const btnClear = document.getElementById('clear-' + inputId);
-            if (inputVal.length > 0) {
-                btnClear.classList.remove('hidden');
-            } else {
-                btnClear.classList.add('hidden');
+      });
+      musicas.forEach(function(m){
+        if(m.trim()){
+          chorosFreq[m.trim()]=(chorosFreq[m.trim()]||0)+1;
+        }
+      });
+    });
+    var topParceiros=Object.entries(parceirosFreq).sort(function(a,b){return b[1]-a[1];}).slice(0,3).map(function(e){return e[0]+' ('+e[1]+'x)';}).join(', ');
+    var topChoros=Object.entries(chorosFreq).sort(function(a,b){return b[1]-a[1];}).slice(0,3).map(function(e){return '"'+e[0]+'" ('+e[1]+'x)';}).join(', ');
+    var percentual=((totalRodas / todosOsEncontros.length)*100).toFixed(1);
+    var mediaParceiros=(totalParticTodos / totalRodas).toFixed(1);
+    var totalChorosDistinct=Object.keys(chorosFreq).length;
+    html+='<div class="bg-white p-2.5 rounded-lg border"><span class="block text-[10px] uppercase font-black text-stone-400">Rodas onde tocou</span><span class="text-lg font-black text-stone-800">'+totalRodas+'</span><span class="block text-[10px] text-stone-500">'+rodasStr+' • '+percentual+'% presença</span></div>';
+    html+='<div class="bg-white p-2.5 rounded-lg border"><span class="block text-[10px] uppercase font-black text-emerald-600">🤝 Parceiros frequentes</span><span class="text-[11px] font-black text-stone-800 leading-tight">'+(topParceiros || '—')+'</span><span class="block text-[10px] text-stone-500 mt-1">'+musicosSetTodos.size+' musicistas diferentes tocaram junto</span></div>';
+    html+='<div class="bg-white p-2.5 rounded-lg border"><span class="block text-[10px] uppercase font-black text-amber-600">🎵 Repertório nas suas rodas</span><span class="text-[11px] font-bold text-stone-700 leading-tight">'+(topChoros || '—')+'</span><span class="block text-[10px] text-stone-500 mt-1">'+totalChorosDistinct+' choros distintos • '+totalChorosTodos+' execuções totais</span></div>';
+    html+='<div class="bg-white p-2.5 rounded-lg border"><span class="block text-[10px] uppercase font-black text-stone-400">📊 Contexto da roda</span><span class="text-[11px] font-bold text-stone-700">'+mediaParceiros+' músicos/roda em média</span><span class="block text-[10px] text-stone-500 mt-1">'+(topInstMusicista || '—')+' • '+datasDisplay[0]+' → '+datasDisplay[datasDisplay.length-1]+'</span></div>';
+  } else if(isRepertorio){
+    // Busca por CHORO ou COMPOSITOR - CORRIGIDO
+    var distinctChoros=matchingChoros.size;
+    var topComp=Object.entries(matchingCompos).sort(function(a,b){return b[1]-a[1];}).slice(0,3).map(function(e){return e[0]+' ('+e[1]+'x)';}).join(', ');
+    var topInstTodos=Object.entries(instrumentosTodos).sort(function(a,b){return b[1]-a[1];}).slice(0,3).map(function(e){return e[0]+' ('+e[1]+')';}).join(', ');
+    html+='<div class="bg-white p-2.5 rounded-lg border"><span class="block text-[10px] uppercase font-black text-stone-400">Rodas onde tocou</span><span class="text-lg font-black text-stone-800">'+totalRodas+'</span><span class="block text-[10px] text-stone-500">'+rodasStr+'</span></div>';
+    html+='<div class="bg-white p-2.5 rounded-lg border"><span class="block text-[10px] uppercase font-black text-stone-400">Vezes tocado</span><span class="text-lg font-black text-emerald-700">'+matchingChorosCount+'</span><span class="block text-[10px] text-stone-500">'+distinctChoros+' choro(s) distinto(s)</span></div>';
+    html+='<div class="bg-white p-2.5 rounded-lg border"><span class="block text-[10px] uppercase font-black text-stone-400">Compositores</span><span class="text-lg font-black text-amber-700">'+Object.keys(matchingCompos).length+'</span><span class="block text-[10px] text-stone-500">'+(topComp || 'dominio publico')+'</span></div>';
+    html+='<div class="bg-white p-2.5 rounded-lg border"><span class="block text-[10px] uppercase font-black text-stone-400">Quem tocou</span><span class="text-[11px] font-bold text-stone-700">'+musicosSetTodos.size+' musicistas</span><span class="block text-[10px] text-stone-500">'+(topInstTodos || 'vários instrumentos')+' • '+datasDisplay.length+' quintas</span></div>';
+  } else {
+    // Busca generica por instrumento ou mista
+    var topInst=Object.entries(instrumentosTodos).sort(function(a,b){return b[1]-a[1];}).slice(0,3).map(function(e){return e[0]+' ('+e[1]+')';}).join(', ');
+    var topComp=Object.entries(composTodos).sort(function(a,b){return b[1]-a[1];}).slice(0,3).map(function(e){return e[0]+' ('+e[1]+'x)';}).join(', ');
+    html+='<div class="bg-white p-2.5 rounded-lg border"><span class="block text-[10px] uppercase font-black text-stone-400">Rodas</span><span class="text-lg font-black text-stone-800">'+totalRodas+'</span><span class="block text-[10px] text-stone-500">'+rodasStr+'</span></div>';
+    html+='<div class="bg-white p-2.5 rounded-lg border"><span class="block text-[10px] uppercase font-black text-stone-400">Musicistas distintos</span><span class="text-lg font-black text-emerald-700">'+musicosSetTodos.size+'</span><span class="block text-[10px] text-stone-500">'+(topInst || 'vários instrumentos')+'</span></div>';
+    html+='<div class="bg-white p-2.5 rounded-lg border"><span class="block text-[10px] uppercase font-black text-stone-400">Choros tocados</span><span class="text-lg font-black text-amber-700">'+totalChorosTodos+'</span><span class="block text-[10px] text-stone-500">'+(topComp || 'repertório variado')+'</span></div>';
+    html+='<div class="bg-white p-2.5 rounded-lg border"><span class="block text-[10px] uppercase font-black text-stone-400">Período</span><span class="text-[11px] font-bold text-stone-700">'+(datasDisplay[0]||'')+' → '+(datasDisplay[datasDisplay.length-1]||'')+'</span><span class="block text-[10px] text-stone-500">'+datasDisplay.length+' quintas diferentes</span></div>';
+  }
+  html+='</div></div><div class="flex flex-col gap-2 md:w-48"><button onclick="document.getElementById(\'btn-expandir-todos\').click()" class="text-xs font-bold bg-emerald-600 text-white px-3 py-2 rounded-full hover:bg-emerald-700">⬇ Ver todas as rodas</button><button onclick="limparFiltros()" class="text-xs font-bold bg-white border px-3 py-2 rounded-full hover:bg-stone-50">✕ Limpar busca</button></div></div>';
+  resumoEl.innerHTML=html;
+  resumoEl.classList.remove('hidden');
+}
+function popularFiltroQuintas(){
+  var select=document.getElementById('filtro-quinta');
+  if(!select || todosOsEncontros.length===0) return;
+  var datasUnicas={};
+  todosOsEncontros.forEach(function(r){
+    if(!r.data) return;
+    var fmt=r.data.split('T')[0];
+    var label=limparDataHistorico(r.data)+' - Encontro #'+r.encontroNumero;
+    if(!datasUnicas[fmt]) datasUnicas[fmt]=label;
+  });
+  var ordenadas=Object.keys(datasUnicas).sort().reverse();
+  select.innerHTML='<option value="">📅 Filtrar por Quinta...</option>';
+  ordenadas.forEach(function(fmt){
+    var opt=document.createElement('option');
+    opt.value=fmt;
+    opt.textContent='Quinta • '+datasUnicas[fmt];
+    select.appendChild(opt);
+  });
+  var optAll=document.createElement('option');
+  optAll.value='todas-quintas';
+  optAll.textContent='📜 Todas as quintas ('+ordenadas.length+' datas)';
+  select.appendChild(optAll);
+}
+var historicoVisivel=false;
+function toggleHistoricoGeral(){
+  var lista=document.getElementById('historico-lista');
+  var vazio=document.getElementById('historico-vazio');
+  var btn=document.getElementById('btn-historico-geral');
+  var btnExp=document.getElementById('btn-expandir-todos');
+  historicoVisivel=!historicoVisivel;
+  if(historicoVisivel){
+    if(lista) lista.classList.remove('hidden');
+    if(vazio) vazio.classList.add('hidden');
+    if(btn) { btn.textContent='✕ Ocultar Histórico'; btn.classList.remove('bg-stone-800'); btn.classList.add('bg-rose-600','hover:bg-rose-700'); }
+    if(btnExp) btnExp.classList.remove('hidden');
+  } else {
+    if(lista) lista.classList.add('hidden');
+    if(vazio) vazio.classList.remove('hidden');
+    if(btn) { btn.textContent='📜 Histórico Geral ('+todosOsEncontros.length+')'; btn.classList.add('bg-stone-800'); btn.classList.remove('bg-rose-600','hover:bg-rose-700'); }
+    if(btnExp) btnExp.classList.add('hidden');
+    var btnRec=document.getElementById('btn-recolher-todos'); if(btnRec) btnRec.classList.add('hidden');
+  }
+}
+function expandirTodosEncontros(){
+  var container=document.getElementById('historico-lista');
+  if(!container) return;
+  var panels=container.querySelectorAll('.accordion-content');
+  for(var i=0;i<panels.length;i++){ panels[i].style.maxHeight=panels[i].scrollHeight+"px"; }
+  var btnExp=document.getElementById('btn-expandir-todos'); var btnRec=document.getElementById('btn-recolher-todos');
+  if(btnExp) btnExp.classList.add('hidden'); if(btnRec) btnRec.classList.remove('hidden');
+}
+function recolherTodosEncontros(){
+  var container=document.getElementById('historico-lista');
+  if(!container) return;
+  var panels=container.querySelectorAll('.accordion-content');
+  for(var i=0;i<panels.length;i++){ panels[i].style.maxHeight=null; }
+  var btnExp=document.getElementById('btn-expandir-todos'); var btnRec=document.getElementById('btn-recolher-todos');
+  if(btnRec) btnRec.classList.add('hidden'); if(btnExp) btnExp.classList.remove('hidden');
+}
+function aplicarFiltros(){
+  var buscaOriginal=document.getElementById('filtro-busca').value.trim(); var instOriginal=document.getElementById('filtro-instrumento').value.trim();
+  var busca=normaliza(buscaOriginal); var instrumento=normaliza(instOriginal);
+  var diEl=document.getElementById('filtro-data-inicio'); var dfEl=document.getElementById('filtro-data-fim');
+  var di=diEl ? diEl.value : ''; var df=dfEl ? dfEl.value : '';
+  var quintaEl=document.getElementById('filtro-quinta'); var quinta=quintaEl ? quintaEl.value : '';
+  encontrosFiltradosGlobais=todosOsEncontros.filter(function(r){
+    if(busca){ var corpo=normaliza([r.encontroNumero, r.musicosNomes, r.repMusicas, r.repComps, r.observacoes].join(' ')); if(corpo.indexOf(busca)===-1) return false; }
+    if(instrumento){ var it=normaliza(r.musicosInst||''); if(it.indexOf(instrumento)===-1) return false; }
+    if(quinta && quinta!=='todas-quintas'){
+      if(r.data){ var fmt=r.data.split('T')[0]; if(fmt!==quinta) return false; } else { return false; }
+    }
+    if(di || df){
+      if(r.data){ var fmt=r.data.split('T')[0]; if(di && fmt < di) return false; if(df && fmt > df) return false; } else { return false; }
+    }
+    return true;
+  });
+  var badge=document.getElementById('badge-filtros'); var txt=document.getElementById('texto-contador-registros'); var dash=document.getElementById('txt-filtro-aviso-dash');
+  if(busca || instrumento || di || df || quinta){ if(badge) badge.classList.remove('hidden'); if(dash) dash.classList.remove('hidden'); if(txt) txt.innerHTML='Filtrado: <strong>'+encontrosFiltradosGlobais.length+'</strong> de <strong>'+todosOsEncontros.length+'</strong> - v8.5'; }
+  else{ if(badge) badge.classList.add('hidden'); if(dash) dash.classList.add('hidden'); if(txt) txt.innerHTML='<strong>'+todosOsEncontros.length+'</strong> encontros'; }
+  // Otimizacao: quando pesquisa, mostra historico automaticamente e gera resumo
+  var listaEl=document.getElementById('historico-lista'); var vazioEl=document.getElementById('historico-vazio');
+  if(busca || instrumento || quinta){
+    if(listaEl) listaEl.classList.remove('hidden');
+    if(vazioEl) vazioEl.classList.add('hidden');
+    historicoVisivel=true;
+    var btn=document.getElementById('btn-historico-geral');
+    if(btn){ btn.textContent='✕ Ocultar Histórico'; btn.classList.remove('bg-stone-800'); btn.classList.add('bg-rose-600','hover:bg-rose-700'); }
+  } else {
+    // Se nao tem busca e historico nao foi aberto manualmente, mantem oculto
+    if(!historicoVisivel){
+      if(listaEl) listaEl.classList.add('hidden');
+      if(vazioEl) vazioEl.classList.remove('hidden');
+    }
+  }
+  renderizarHistorico(encontrosFiltradosGlobais, buscaOriginal, instOriginal);
+  gerarResumoPesquisa(buscaOriginal, encontrosFiltradosGlobais);
+  atualizarPainelEstatisticas(encontrosFiltradosGlobais);
+}
+function limparFiltros(){
+  var b=document.getElementById('filtro-busca'); if(b) b.value='';
+  var i=document.getElementById('filtro-instrumento'); if(i) i.value='';
+  var di=document.getElementById('filtro-data-inicio'); if(di) di.value='';
+  var df=document.getElementById('filtro-data-fim'); if(df) df.value='';
+  var q=document.getElementById('filtro-quinta'); if(q) q.value='';
+  var cb=document.getElementById('clear-filtro-busca'); if(cb) cb.classList.add('hidden');
+  var ci=document.getElementById('clear-filtro-instrumento'); if(ci) ci.classList.add('hidden');
+  var resumo=document.getElementById('resumo-pesquisa'); if(resumo){ resumo.classList.add('hidden'); resumo.innerHTML=''; }
+  historicoVisivel=false;
+  var lista=document.getElementById('historico-lista'); if(lista) lista.classList.add('hidden');
+  var vazio=document.getElementById('historico-vazio'); if(vazio) vazio.classList.remove('hidden');
+  var btn=document.getElementById('btn-historico-geral'); if(btn){ btn.textContent='📜 Histórico Geral ('+todosOsEncontros.length+')'; btn.classList.add('bg-stone-800'); btn.classList.remove('bg-rose-600','hover:bg-rose-700'); }
+  var btnExp=document.getElementById('btn-expandir-todos'); if(btnExp) btnExp.classList.add('hidden');
+  var btnRec=document.getElementById('btn-recolher-todos'); if(btnRec) btnRec.classList.add('hidden');
+  aplicarFiltros();
+}
+function exportarParaCSV(){ if(encontrosFiltradosGlobais.length===0) return; var csv="data:text/csv;charset=utf-8,Encontro;Data;Musicistas;Instrumentos;Choros;Compositores;Observacoes\n"; encontrosFiltradosGlobais.forEach(function(r){ var linha=[r.encontroNumero, limparDataHistorico(r.data), (r.musicosNomes||'').replace(/;/g,','), (r.musicosInst||'').replace(/;/g,','), (r.repMusicas||'').replace(/;/g,','), (r.repComps||'').replace(/;/g,','), (r.observacoes||'').replace(/;/g,',')].join(";"); csv+=linha+"\n"; }); var a=document.createElement("a"); a.href=encodeURI(csv); a.download="Clube_Choro_v84_"+new Date().toISOString().slice(0,10)+".csv"; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
+function renderizarMiniRanking(id,lista,cor,suf,tipo){ if(!suf) suf='x'; if(!tipo) tipo=''; var c=document.getElementById(id); if(lista.length===0){ c.innerHTML='<p class="text-xs text-stone-400 italic">Nenhum dado.</p>'; return; } var maior=lista[0][1]; c.innerHTML=lista.map(function(it, idx){
+  var nome=it[0]; var tot=it[1]; var extra=it[2]||''; var perc=maior>0 ? (tot/maior)*100 : 0;
+  var rank=idx+1;
+  var clickAttr='';
+  if(tipo==='musica') clickAttr=' data-tipo="busca" data-valor="'+escapeAttr(nome)+'" title="Clique para filtrar por '+escapeAttr(nome)+' - '+extra+'"';
+  else if(tipo==='compositor') clickAttr=' data-tipo="busca" data-valor="'+escapeAttr(nome)+'" title="Clique para filtrar por '+escapeAttr(nome)+' - '+extra+'"';
+  else if(tipo==='dia') clickAttr=' data-tipo="dia" data-valor="'+escapeAttr(nome.replace('Encontro #',''))+'" title="Clique para ver Encontro '+escapeAttr(nome)+' - '+extra+'"';
+  return '<div class="space-y-0.5 group cursor-pointer hover:bg-stone-50 rounded-lg p-1 -m-1"'+clickAttr+'><div class="flex justify-between text-xs font-bold text-stone-600"><span class="flex items-center gap-1.5 truncate max-w-[170px]"><span class="text-[10px] bg-stone-200 text-stone-600 w-4 h-4 rounded-full flex items-center justify-center">'+rank+'</span><span class="truncate">'+escapeHtml(nome)+'</span></span><span class="text-stone-900 flex items-center gap-1">'+tot+suf+'<span class="text-[9px] text-stone-400">'+(extra ? ' • '+escapeHtml(extra) : '')+'</span></span></div><div class="w-full bg-stone-100 rounded-full h-2.5 mt-1"><div class="'+cor+' h-2.5 rounded-full transition-all" style="width:'+perc+'%"></div></div></div>';
+}).join('');
+  // Adiciona clique para filtrar
+  var items=c.querySelectorAll('[data-tipo]');
+  for(var i=0;i<items.length;i++){
+    items[i].addEventListener('click', function(){
+      var t=this.getAttribute('data-tipo');
+      var v=this.getAttribute('data-valor');
+      if(t==='busca'){
+        document.getElementById('filtro-busca').value=v;
+        document.getElementById('clear-filtro-busca').classList.remove('hidden');
+        switchTab('consulta-tab');
+        aplicarFiltros();
+        window.scrollTo({top:150, behavior:'smooth'});
+      } else if(t==='dia'){
+        var num=parseInt(v,10);
+        var enc=todosOsEncontros.find(function(e){ return e.encontroNumero==num; });
+        if(enc){
+          switchTab('consulta-tab');
+          // Destaca o encontro
+          setTimeout(function(){
+            var container=document.getElementById('historico-lista');
+            var btns=container.querySelectorAll('button');
+            for(var b=0;b<btns.length;b++){
+              if(btns[b].textContent.indexOf('#'+num)!==-1){
+                btns[b].scrollIntoView({behavior:'smooth', block:'center'});
+                btns[b].classList.add('ring-2','ring-emerald-400');
+                setTimeout(function(btn){ btn.classList.remove('ring-2','ring-emerald-400'); }, 2000, btns[b]);
+                break;
+              }
             }
-
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                aplicarFiltros();
-            }, 300);
+          }, 300);
         }
-
-        function limparInput(inputId) {
-            document.getElementById(inputId).value = '';
-            document.getElementById('clear-' + inputId).classList.add('hidden');
-            aplicarFiltros();
-        }
-
-        function limparDataHistorico(dataStr) {
-            if (!dataStr) return "Sem data";
-            if (dataStr.includes('T') && dataStr.includes('/')) {
-                const partes = dataStr.split('/');
-                return `${partes[0].split('T')[0].padStart(2, '0')}/${partes[1].padStart(2, '0')}/${partes[2]}`;
+      }
+    });
+  }
+}
+function inicializarGraficosAvancados(evolu,mus,comp,inst){
+  try{
+    Object.values(instanciasGraficos).forEach(function(ch){ if(ch) ch.destroy(); });
+    // EVOLUCAO - clicavel para ir para encontro
+    instanciasGraficos.evolucao=new Chart(document.getElementById('chart-evolucao-presenca'), {
+      type:'line',
+      data:{
+        labels:evolu.map(function(d){return d.label;}),
+        datasets:[{
+          label:'Musicistas por encontro',
+          data:evolu.map(function(d){return d.valor;}),
+          borderColor:'#047857',
+          backgroundColor:'rgba(4,120,87,0.15)',
+          borderWidth:2.5,
+          fill:true,
+          tension:0.35,
+          pointRadius:4,
+          pointHoverRadius:6,
+          pointBackgroundColor:'#047857'
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        interaction:{mode:'index', intersect:false},
+        onClick:function(evt, elements){
+          if(elements.length>0){
+            var idx=elements[0].index;
+            var label=evolu[idx] ? evolu[idx].label : '';
+            var num=label.replace('#','');
+            if(num){
+              var encNum=parseInt(num,10);
+              switchTab('consulta-tab');
+              setTimeout(function(){
+                var container=document.getElementById('historico-lista');
+                var btns=container.querySelectorAll('button');
+                for(var b=0;b<btns.length;b++){
+                  if(btns[b].textContent.indexOf('#'+encNum)!==-1){
+                    btns[b].scrollIntoView({behavior:'smooth', block:'center'});
+                    btns[b].classList.add('ring-2','ring-emerald-400');
+                    setTimeout(function(btn){ btn.classList.remove('ring-2','ring-emerald-400'); }, 2000, btns[b]);
+                    break;
+                  }
+                }
+              }, 300);
             }
-            if (dataStr.includes('-')) {
-                const partes = dataStr.split('T')[0].split('-');
-                return `${partes[2]}/${partes[1]}/${partes[0]}`;
+          }
+        },
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            callbacks:{
+              title:function(items){ return 'Encontro '+items[0].label+' - Clique para ver'; },
+              label:function(item){ return item.raw+' musicistas'; }
             }
-            return dataStr;
+          },
+          title:{display:true, text:'Clique no ponto para ir ao encontro', font:{size:10}, color:'#78716c', padding:{bottom:8}}
+        },
+        scales:{
+          y:{beginAtZero:true, ticks:{stepSize:1, precision:0}, grid:{color:'rgba(0,0,0,0.05)'}},
+          x:{ticks:{maxRotation:45, minRotation:0, maxTicksLimit:12, autoSkip:true, font:{size:10}}, grid:{display:false}}
         }
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.replace('block', 'hidden'));
-            document.getElementById(tabId).classList.replace('hidden', 'block');
-            
-            document.querySelectorAll('.tab-btn').forEach(el => el.className = "flex-1 py-2.5 px-4 rounded-full text-sm font-bold text-stone-600 hover:text-stone-400 transition-all cursor-pointer tab-btn");
-            const activeBtn = tabId === 'consulta-tab' ? 'btn-consulta' : 'btn-dashboard';
-            document.getElementById(activeBtn).className = "flex-1 py-2.5 px-4 rounded-full text-sm font-bold text-emerald-900 bg-white shadow-xs transition-all cursor-pointer tab-btn";
-        }
-
-        function alternarSubVisaoDash(visao) {
-            const painelMini = document.getElementById('dash-visao-mini');
-            const painelAvancado = document.getElementById('dash-visao-avancada');
-            const btnMini = document.getElementById('sub-btn-mini');
-            const btnAvancado = document.getElementById('sub-btn-avancada');
-
-            if (visao === 'mini') {
-                painelMini.classList.remove('hidden');
-                painelAvancado.classList.add('hidden');
-                btnMini.className = "flex-1 py-1.5 px-3 text-xs font-black rounded-lg transition-all bg-white text-emerald-950 shadow-2xs cursor-pointer";
-                btnAvancado.className = "flex-1 py-1.5 px-3 text-xs font-bold rounded-lg transition-all text-stone-500 hover:text-stone-400 cursor-pointer";
-            } else {
-                painelMini.classList.add('hidden');
-                painelAvancado.classList.remove('hidden');
-                btnMini.className = "flex-1 py-1.5 px-3 text-xs font-bold rounded-lg transition-all text-stone-500 hover:text-stone-400 cursor-pointer";
-                btnAvancado.className = "flex-1 py-1.5 px-3 text-xs font-black rounded-lg transition-all bg-white text-emerald-950 shadow-2xs cursor-pointer";
-            }
-        }
-
-        function toggleDarkMode() {
-            const body = document.getElementById('body-app');
-            const icone = document.getElementById('dark-mode-icon');
-            
-            if (body.classList.contains('dark-mode')) {
-                body.classList.remove('dark-mode');
-                icone.innerText = "🌙";
-                localStorage.setItem('brasileirinho_theme', 'light');
-            } else {
-                body.classList.add('dark-mode');
-                icone.innerText = "☀️";
-                localStorage.setItem('brasileirinho_theme', 'dark');
-            }
-        }
-
-        function aplicarChip(valor, tipo) {
-            if (tipo === 'inst') {
-                document.getElementById('filtro-instrumento').value = valor;
-                document.getElementById('clear-filtro-instrumento').classList.remove('hidden');
-            } else {
-                document.getElementById('filtro-busca').value = valor;
-                document.getElementById('clear-filtro-busca').classList.remove('hidden');
-            }
-            aplicarFiltros();
-        }
-
-        function filtrarPorMusico(nome) {
-            document.getElementById('filtro-busca').value = nome;
+      }
+    });
+    // TOP 10 CHOROS - clicavel para filtrar por choro
+    var totalChorosExec = mus.reduce(function(s, d){ return s + d[1]; }, 0) || 1;
+    instanciasGraficos.musicas=new Chart(document.getElementById('chart-top-musicas'), {
+      type:'bar',
+      data:{
+        labels:mus.map(function(d){return d[0];}),
+        datasets:[{
+          label:'Vezes tocada',
+          data:mus.map(function(d){return d[1];}),
+          backgroundColor:['#047857','#059669','#10b981','#34d399','#6ee7b7','#a7f3d0','#6ee7b7','#34d399','#10b981','#059669'],
+          borderRadius:6,
+          borderSkipped:false
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        indexAxis:'y',
+        onClick:function(evt, elements){
+          if(elements.length>0){
+            var idx=elements[0].index;
+            var label=mus[idx][0];
+            document.getElementById('filtro-busca').value=label;
             document.getElementById('clear-filtro-busca').classList.remove('hidden');
             switchTab('consulta-tab');
             aplicarFiltros();
-            window.scrollTo({ top: 150, behavior: 'smooth' });
-        }
-
-        function renderizarHistorico(rodas, buscaOriginal = '', instrumentoOriginal = '') {
-            const container = document.getElementById('historico-lista');
-            
-            if (rodas.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center py-10 bg-stone-50 dark:bg-stone-900/40 rounded-xl border border-dashed border-stone-200 dark:border-stone-800">
-                        <span class="text-5xl mb-3 block">🏜️</span>
-                        <h3 class="text-lg font-black text-stone-700 dark:text-stone-300 mb-1">Nenhum choro encontrado!</h3>
-                        <p class="text-sm text-stone-500 mb-5">O nosso acervo ainda não tem registros que batam com essa pesquisa.</p>
-                        <button onclick="limparFiltros()" class="bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 px-5 py-2.5 rounded-full font-bold text-sm hover:scale-105 transition cursor-pointer">
-                            ↻ Limpar Filtros
-                        </button>
-                    </div>
-                `;
-                return;
+            window.scrollTo({top:150, behavior:'smooth'});
+          }
+        },
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            callbacks:{
+              label:function(item){
+                var pct=((item.raw/totalChorosExec)*100).toFixed(1);
+                return item.label+': '+item.raw+'x ('+pct+'% dos top 10) - Clique para filtrar';
+              }
             }
-            container.innerHTML = '';
-            
-            const buscaNormalizada = removerAcentos(buscaOriginal);
-            const instNormalizado = removerAcentos(instrumentoOriginal);
-            
-            rodas.forEach(r => {
-                const nomes = r.musicosNomes ? r.musicosNomes.split(' | ') : [];
-                const insts = r.musicosInst ? r.musicosInst.split(' | ') : [];
-                const musicas = r.repMusicas ? r.repMusicas.split(' | ') : [];
-                const comps = r.repComps ? r.repComps.split(' | ') : [];
-
-                let musicosHtml = [];
-                nomes.forEach((n, i) => {
-                    if (!n.trim()) return;
-                    const inst = insts[i] || '?';
-                    
-                    const strComparacao = removerAcentos(`${n} ${inst}`);
-                    const atendeBusca = buscaNormalizada ? strComparacao.includes(buscaNormalizada) : true;
-                    const atendeInst = instNormalizado ? removerAcentos(inst).includes(instNormalizado) : true;
-                    
-                    // Exibe apenas os músicos que batem com os filtros ativos
-                    if (atendeBusca && atendeInst) {
-                        const tagMusico = `<span onclick="filtrarPorMusico('${n.trim().replace(/'/g, "\\'")}')" class="cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline font-semibold transition-colors" title="Ver histórico deste músico">${n}</span>`;
-                        musicosHtml.push(`<li>• ${tagMusico} <span class="text-stone-400 text-xs">(${inst})</span></li>`);
-                    }
-                });
-
-                // Se houveram músicos, mas todos foram ocultados pelo filtro, deixamos um aviso discreto
-                if (musicosHtml.length === 0 && nomes.length > 0) {
-                    musicosHtml.push(`<li><span class="text-stone-400 text-[11px] italic">...outros músicos ocultados pelo filtro</span></li>`);
-                }
-
-                let musicasHtml = [];
-                        const buscaEhNomeDeMusico = buscaNormalizada? nomes.some(n => removerAcentos(n).includes(buscaNormalizada)) : false;
-
-                            musicas.forEach((m, i) => {
-                    if (!m.trim()) return;
-                        const comp = comps[i] || 'Domínio Público';
-                        const strComparacao = removerAcentos(`${m} ${comp}`);
-                        const atendeBusca = buscaEhNomeDeMusico? true : (buscaNormalizada? strComparacao.includes(buscaNormalizada) : true);
-                    
-                    // Exibe apenas as músicas que batem com o filtro de busca geral
-                    if (atendeBusca) {
-                        const linkAudio = `https://www.youtube.com/results?search_query=Choro+${encodeURIComponent(m.trim())}+${encodeURIComponent(comp.trim())}`;
-                        const tagMusica = `<a href="${linkAudio}" target="_blank" class="hover:text-emerald-700 dark:hover:text-emerald-400 hover:underline inline-flex items-center gap-1" title="Procurar gravação no YouTube">"${m}" <span class="text-[10px] opacity-60">↗️</span></a>`;
-                        musicasHtml.push(`<li>• ${tagMusica} <span class="text-stone-400 text-xs">— ${comp}</span></li>`);
-                    }
-                });
-
-                if (musicasHtml.length === 0 && musicas.length > 0) {
-                    musicasHtml.push(`<li><span class="text-stone-400 text-[11px] italic">...repertório ocultado pelo filtro</span></li>`);
-                }
-
-                const btn = document.createElement('button');
-                btn.className = "w-full text-left font-bold text-stone-700 bg-stone-100 hover:bg-stone-200 p-3.5 rounded-xl outline-none flex justify-between items-center transition cursor-pointer";
-                btn.innerHTML = `<span>Encontro #${r.encontroNumero} — <span class="text-stone-500 font-medium">${limparDataHistorico(r.data)}</span></span><span class="text-xs bg-white text-stone-500 px-2 py-1 rounded-md shadow-2xs">Ver ▾</span>`;
-
-                const panel = document.createElement('div');
-                panel.className = "accordion-content bg-white border-x border-b border-stone-100 rounded-b-xl px-4";
-                panel.innerHTML = `
-                    <div class="py-4 text-sm space-y-3">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div><strong class="text-emerald-800 dark:text-emerald-400 text-xs uppercase tracking-wider block mb-1">Musicistas na Roda</strong><ul class="space-y-1 text-stone-600">${musicosHtml.join('')}</ul></div>
-                            <div><strong class="text-amber-700 dark:text-amber-400 text-xs uppercase tracking-wider block mb-1">Choros Tocados</strong><ul class="space-y-1 text-stone-600">${musicasHtml.join('')}</ul></div>
-                        </div>
-                        ${r.observacoes ? `<div class="bg-stone-50 dark:bg-stone-900/60 p-2.5 rounded-lg text-xs text-stone-600"><strong>Nota:</strong> ${r.observacoes}</div>` : ''}
-                    </div>
-                `;
-
-                btn.addEventListener('click', function() {
-                    if (panel.style.maxHeight) panel.style.maxHeight = null;
-                    else panel.style.maxHeight = panel.scrollHeight + "px";
-                });
-
-                container.appendChild(btn);
-                container.appendChild(panel);
-            });
+          },
+          title:{display:true, text:'Clique na barra para filtrar por choro', font:{size:10}, color:'#78716c', padding:{bottom:8}}
+        },
+        scales:{
+          x:{beginAtZero:true, ticks:{precision:0, font:{size:10}}, grid:{color:'rgba(0,0,0,0.05)'}},
+          y:{ticks:{font:{size:11}, autoSkip:false}, grid:{display:false}}
         }
-
-        function aplicarFiltros() {
-            const buscaOriginal = document.getElementById('filtro-busca').value.trim();
-            const instrumentoOriginal = document.getElementById('filtro-instrumento').value.trim();
-            
-            const busca = removerAcentos(buscaOriginal);
-            const instrumento = removerAcentos(instrumentoOriginal);
-            
-            const dataInicio = document.getElementById('filtro-data-inicio').value;
-            const dataFim = document.getElementById('filtro-data-fim').value;
-
-            const urlParams = new URLSearchParams();
-            if (buscaOriginal) urlParams.set('busca', buscaOriginal);
-            if (instrumentoOriginal) urlParams.set('inst', instrumentoOriginal);
-            if (dataInicio) urlParams.set('inicio', dataInicio);
-            if (dataFim) urlParams.set('fim', dataFim);
-            const stringUrl = urlParams.toString() ? '?' + urlParams.toString() : window.location.pathname;
-            window.history.replaceState({}, '', stringUrl);
-
-            encontrosFiltradosGlobais = todosOsEncontros.filter(r => {
-                if (busca) {
-                    const corpoTexto = removerAcentos([r.encontroNumero, r.musicosNomes, r.repMusicas, r.repComps, r.observacoes].join(' '));
-                    if (!corpoTexto.includes(busca)) return false;
-                }
-                if (instrumento) {
-                    const instrumentosTexto = removerAcentos(r.musicosInst || '');
-                    if (!instrumentosTexto.includes(instrumento)) return false;
-                }
-                if (r.data) {
-                    const dataFormatada = r.data.split('T')[0];
-                    if (dataInicio && dataFormatada < dataInicio) return false;
-                    if (dataFim && dataFormatada > dataFim) return false;
-                } else if (dataInicio || dataFim) {
-                    return false;
-                }
-                return true;
-            });
-            
-            const badge = document.getElementById('badge-filtros');
-            const txtContador = document.getElementById('texto-contador-registros');
-            const txtAvisoDash = document.getElementById('txt-filtro-aviso-dash');
-
-            if (busca || instrumento || dataInicio || dataFim) {
-                badge.classList.remove('hidden');
-                txtAvisoDash.classList.remove('hidden');
-                txtContador.innerHTML = `Filtrado: Localizados <strong>${encontrosFiltradosGlobais.length}</strong> de <strong>${todosOsEncontros.length}</strong> encontros.`;
-            } else {
-                badge.classList.add('hidden');
-                txtAvisoDash.classList.add('hidden');
-                txtContador.innerHTML = `Total estável de <strong>${todosOsEncontros.length}</strong> encontros carregados.`;
-            }
-
-            renderizarHistorico(encontrosFiltradosGlobais, buscaOriginal, instrumentoOriginal);
-            atualizarPainelEstatisticas(encontrosFiltradosGlobais);
-        }
-
-        function limparFiltros() {
-            document.getElementById('filtro-busca').value = '';
-            document.getElementById('filtro-instrumento').value = '';
-            document.getElementById('filtro-data-inicio').value = '';
-            document.getElementById('filtro-data-fim').value = '';
-            
-            document.getElementById('clear-filtro-busca').classList.add('hidden');
-            document.getElementById('clear-filtro-instrumento').classList.add('hidden');
-            
+      }
+    });
+    // TOP 10 COMPOSITORES - clicavel para filtrar por compositor
+    var totalCompExec = comp.reduce(function(s, d){ return s + d[1]; }, 0) || 1;
+    instanciasGraficos.compositores=new Chart(document.getElementById('chart-top-compositores'), {
+      type:'bar',
+      data:{
+        labels:comp.map(function(d){return d[0];}),
+        datasets:[{
+          label:'Obras distintas',
+          data:comp.map(function(d){return d[1];}),
+          backgroundColor:['#d97706','#f59e0b','#fbbf24','#fcd34d','#fde68a','#fcd34d','#fbbf24','#f59e0b','#d97706','#92400e'],
+          borderRadius:6,
+          borderSkipped:false
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        indexAxis:'y',
+        onClick:function(evt, elements){
+          if(elements.length>0){
+            var idx=elements[0].index;
+            var label=comp[idx][0];
+            document.getElementById('filtro-busca').value=label;
+            document.getElementById('clear-filtro-busca').classList.remove('hidden');
+            switchTab('consulta-tab');
             aplicarFiltros();
-        }
-
-        function exportarParaCSV() {
-            if (encontrosFiltradosGlobais.length === 0) return;
-            
-            let conteudoCsv = "data:text/csv;charset=utf-8,";
-            conteudoCsv += "Encontro;Data;Musicistas;Instrumentos;Choros;Compositores;Observacoes\n";
-            
-            encontrosFiltradosGlobais.forEach(r => {
-                const linha = [
-                    r.encontroNumero,
-                    limparDataHistorico(r.data),
-                    (r.musicosNomes || '').replace(/;/g, ','),
-                    (r.musicosInst || '').replace(/;/g, ','),
-                    (r.repMusicas || '').replace(/;/g, ','),
-                    (r.repComps || '').replace(/;/g, ','),
-                    (r.observacoes || '').replace(/;/g, ',')
-                ].join(";");
-                conteudoCsv += linha + "\n";
-            });
-            
-            const linkCodificado = encodeURI(conteudoCsv);
-            const linkElemento = document.createElement("a");
-            linkElemento.setAttribute("href", linkCodificado);
-            linkElemento.setAttribute("download", `Clube_Choro_Filtrado_${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(linkElemento);
-            linkElemento.click();
-            document.body.removeChild(linkElemento);
-        }
-
-        function renderizarMiniRanking(containerId, listaItens, corBarra, sufixo = '×') {
-            const container = document.getElementById(containerId);
-            if (listaItens.length === 0) {
-                container.innerHTML = '<p class="text-xs text-stone-400 italic">Nenhum dado.</p>';
-                return;
+            window.scrollTo({top:150, behavior:'smooth'});
+          }
+        },
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            callbacks:{
+              label:function(item){
+                var pct=((item.raw/totalCompExec)*100).toFixed(1);
+                return item.label+': '+item.raw+' obras distintas ('+pct+'%) - Clique para filtrar';
+              }
             }
-            const maiorValor = listaItens[0][1];
-            container.innerHTML = listaItens.map(([nome, total]) => {
-                const percentual = maiorValor > 0 ? (total / maiorValor) * 100 : 0;
-                return `
-                    <div class="space-y-0.5">
-                        <div class="flex justify-between text-xs font-bold text-stone-600">
-                            <span class="truncate max-w-[150px]" title="${nome}">${nome}</span>
-                            <span class="text-stone-900">${total}${sufixo}</span>
-                        </div>
-                        <div class="w-full bg-stone-100 dark:bg-stone-800 rounded-full h-2">
-                            <div class="${corBarra} h-2 rounded-full transition-all duration-500" style="width: ${percentual}%"></div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+          },
+          title:{display:true, text:'Clique na barra para filtrar por compositor', font:{size:10}, color:'#78716c', padding:{bottom:8}}
+        },
+        scales:{
+          x:{beginAtZero:true, ticks:{precision:0, font:{size:10}}, grid:{color:'rgba(0,0,0,0.05)'}},
+          y:{ticks:{font:{size:11}, autoSkip:false}, grid:{display:false}}
         }
-
-        function inicializarGraficosAvancados(dadosEvolucao, dadosMusicas, dadosCompositores, dadosInstrumentos) {
-            Object.values(instanciasGraficos).forEach(chart => chart.destroy());
-
-            const opcoesPadrao = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
-
-            instanciasGraficos.evolucao = new Chart(document.getElementById('chart-evolucao-presenca'), {
-                type: 'line',
-                data: {
-                    labels: dadosEvolucao.map(d => d.label),
-                    datasets: [{ label: 'Musicistas', data: dadosEvolucao.map(d => d.valor), borderColor: '#047857', backgroundColor: 'rgba(4, 120, 87, 0.1)', borderWidth: 3, fill: true, tension: 0.2 }]
-                },
-                options: { ...opcoesPadrao, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-            });
-
-            instanciasGraficos.musicas = new Chart(document.getElementById('chart-top-musicas'), {
-                type: 'bar',
-                data: {
-                    labels: dadosMusicas.map(d => d[0]),
-                    datasets: [{ data: dadosMusicas.map(d => d[1]), backgroundColor: '#047857', borderRadius: 6 }]
-                },
-                options: { ...opcoesPadrao, indexAxis: 'y', scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-            });
-
-            instanciasGraficos.compositores = new Chart(document.getElementById('chart-top-compositores'), {
-                type: 'bar',
-                data: {
-                    labels: dadosCompositores.map(d => d[0]),
-                    datasets: [{ data: dadosCompositores.map(d => d[1]), backgroundColor: '#f59e0b', borderRadius: 6 }]
-                },
-                options: { ...opcoesPadrao, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-            });
-
-            instanciasGraficos.instrumentos = new Chart(document.getElementById('chart-mix-instrumentos'), {
-                type: 'doughnut',
-                data: {
-                    labels: dadosInstrumentos.map(d => d[0]),
-                    datasets: [{
-                        data: dadosInstrumentos.map(d => d[1]),
-                        backgroundColor: ['#047857', '#f59e0b', '#78716c', '#10b981', '#f59e0b', '#a8a29e', '#065f46']
-                    }]
-                },
-                options: { ...opcoesPadrao, plugins: { legend: { display: true, position: 'right', labels: { boxWidth: 12, font: { size: 10 } } } } }
-            });
-        }
-
-        function atualizarPainelEstatisticas(listaRodas) {
-            let contagemMusicas = {};
-            let contagemCompositores = {};
-            let contagemInstrumentos = {};
-            let contagemDiasCheios = [];
-            let dadosEvolucaoCronologica = [];
-            let totalMusicosUnicos = new Set();
-            let acumuladorMusicas = 0;
-            let maxMusicosContagem = 0;
-            let dataRecordeMúsicos = "Sem registros";
-
-            const rodasOrdenadas = [...listaRodas].sort((a,b) => Number(a.encontroNumero) - Number(b.encontroNumero));
-
-            rodasOrdenadas.forEach(r => {
-                const nomes = r.musicosNomes ? r.musicosNomes.split(' | ') : [];
-                const insts = r.musicosInst ? r.musicosInst.split(' | ') : [];
-                const musicas = r.repMusicas ? r.repMusicas.split(' | ') : [];
-                const comps = r.repComps ? r.repComps.split(' | ') : [];
-
-                const totalMusicosDessaRoda = nomes.filter(n => n.trim() !== '').length;
-                
-                if (totalMusicosDessaRoda > maxMusicosContagem) {
-                    maxMusicosContagem = totalMusicosDessaRoda;
-                    dataRecordeMúsicos = `${limparDataHistorico(r.data)} (${totalMusicosDessaRoda} Musicistas)`;
-                }
-
-                if (totalMusicosDessaRoda > 0) {
-                    contagemDiasCheios.push([`Encontro #${r.encontroNumero}`, totalMusicosDessaRoda]);
-                    dadosEvolucaoCronologica.push({ label: `#${r.encontroNumero}`, valor: totalMusicosDessaRoda });
-                }
-
-                nomes.forEach((n, i) => {
-                    const nomeLimpo = n.trim();
-                    if(nomeLimpo) {
-                        const nomeNormalizado = nomeLimpo.toLowerCase().split(' ').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
-                        totalMusicosUnicos.add(nomeNormalizado);
-                    }
-                    const instLimpo = insts[i] ? insts[i].trim() : '';
-                    if(instLimpo) contagemInstrumentos[instLimpo] = (contagemInstrumentos[instLimpo] || 0) + 1;
+      }
+    });
+    // MIX INSTRUMENTOS - SIGNIFICADO E UTILIDADE PARA PESQUISA
+    // Significado: Distribuicao de participacoes por instrumento nas rodas
+    // Para pesquisa, mostra: frequencia total + quantos musicistas distintos tocam cada instrumento + media por roda
+    var totalInst = inst.reduce(function(s, d){ return s + d[1]; }, 0) || 1;
+    var totalRodasAtual = window._totalRodas || 32;
+    var cISetLocal = window._cISetDistintos || {};
+    instanciasGraficos.instrumentos=new Chart(document.getElementById('chart-mix-instrumentos'), {
+      type:'doughnut',
+      data:{
+        labels:inst.map(function(d){return d[0];}),
+        datasets:[{
+          data:inst.map(function(d){return d[1];}),
+          backgroundColor:['#047857','#f59e0b','#78716c','#10b981','#0e7490','#7c3aed','#db2777','#ea580c','#16a34a','#ca8a04'],
+          borderWidth:2,
+          borderColor:'#ffffff',
+          hoverOffset:10
+        }]
+      },
+      options:{
+        responsive:true,
+        maintainAspectRatio:false,
+        onClick:function(evt, elements){
+          if(elements.length>0){
+            var idx=elements[0].index;
+            var label=inst[idx][0];
+            aplicarChip(label, 'inst');
+            switchTab('consulta-tab');
+            window.scrollTo({top:0, behavior:'smooth'});
+          }
+        },
+        plugins:{
+          legend:{
+            display:true,
+            position:'right',
+            labels:{
+              boxWidth:14,
+              font:{size:11},
+              padding:12,
+              usePointStyle:true,
+              generateLabels:function(chart){
+                var data=chart.data;
+                return data.labels.map(function(label, i){
+                  var count=data.datasets[0].data[i];
+                  var distintos=cISetLocal[label] ? cISetLocal[label].size : 0;
+                  return {
+                    text: label+' ('+count+'x, '+distintos+' musicistas)',
+                    fillStyle: data.datasets[0].backgroundColor[i],
+                    strokeStyle: '#fff',
+                    pointStyle: 'circle',
+                    hidden: false,
+                    index: i
+                  };
                 });
-
-                musicas.forEach((m, i) => {
-                    const musicaLimpa = m.trim();
-                    if(musicaLimpa) {
-                        acumuladorMusicas++;
-                        contagemMusicas[musicaLimpa] = (contagemMusicas[musicaLimpa] || 0) + 1;
-                    }
-                    const compLimpo = comps[i] ? comps[i].trim() : '';
-                    if(compLimpo) contagemCompositores[compLimpo] = (contagemCompositores[compLimpo] || 0) + 1;
-                });
-            });
-
-            document.getElementById('dash-total-rodas').innerText = listaRodas.length;
-            document.getElementById('dash-total-musicos').innerText = totalMusicosUnicos.size;
-            document.getElementById('dash-total-musicas').innerText = acumuladorMusicas;
-            document.getElementById('chart-val-pico-musicos').innerText = dataRecordeMúsicos;
-
-            const topMusicasMini = Object.entries(contagemMusicas).sort((a,b) => b[1] - a[1]).slice(0, 4);
-            const topCompositoresMini = Object.entries(contagemCompositores).sort((a,b) => b[1] - a[1]).slice(0, 4);
-            const topDiasCheiosMini = [...contagemDiasCheios].sort((a, b) => b[1] - a[1]).slice(0, 4);
-
-            renderizarMiniRanking('ranking-musicas', topMusicasMini, 'bg-emerald-600');
-            renderizarMiniRanking('ranking-compositores', topCompositoresMini, 'bg-amber-500');
-            renderizarMiniRanking('ranking-dias-cheios', topDiasCheiosMini, 'bg-stone-500', ' m.');
-
-            const topMusicasGrafico = Object.entries(contagemMusicas).sort((a,b) => b[1] - a[1]).slice(0, 10);
-            const topCompositoresGrafico = Object.entries(contagemCompositores).sort((a,b) => b[1] - a[1]).slice(0, 10);
-            const mixInstrumentosGrafico = Object.entries(contagemInstrumentos).sort((a,b) => b[1] - a[1]).slice(0, 7);
-
-            inicializarGraficosAvancados(dadosEvolucaoCronologica, topMusicasGrafico, topCompositoresGrafico, mixInstrumentosGrafico);
+              }
+            }
+          },
+          tooltip:{
+            callbacks:{
+              label:function(item){
+                var label=item.label;
+                var count=item.raw;
+                var pct=((count/totalInst)*100).toFixed(1);
+                var distintos=cISetLocal[label] ? cISetLocal[label].size : 0;
+                var media=(count/totalRodasAtual).toFixed(2);
+                return [
+                  ' '+label+': '+count+' participacoes',
+                  '  -> '+distintos+' musicistas distintos',
+                  '  -> '+pct+'% do total de participacoes',
+                  '  -> media '+media+' por roda (em '+totalRodasAtual+' rodas)',
+                  '  Clique para filtrar por '+label
+                ];
+              }
+            }
+          },
+          title:{
+            display:true,
+            text:'Total: '+totalInst+' participacoes em '+totalRodasAtual+' rodas | Clique na fatia para filtrar',
+            font:{size:10},
+            color:'#78716c',
+            padding:{bottom:8}
+          }
+        },
+        cutout:'52%'
+      }
+    });
+  }catch(e){ console.error('Erro graficos', e); }
+}
+function atualizarPainelEstatisticas(lista){
+  var cM={}; var cC={}; var cCSet={}; var cCTotal={}; var cI={}; var cISet={}; var cD=[]; var ev=[]; var uni={}; var acum=0; var max=0; var rec="Sem registros";
+  var choroInfo={}; // choro -> {encontros:Set, compositor, firstDate, lastDate}
+  var ord=lista.slice().sort(function(a,b){ return Number(a.encontroNumero)-Number(b.encontroNumero); });
+  ord.forEach(function(r){
+    var nomes=r.musicosNomes ? r.musicosNomes.split(' | ') : []; var insts=r.musicosInst ? r.musicosInst.split(' | ') : []; var mus=r.repMusicas ? r.repMusicas.split(' | ') : []; var comps=r.repComps ? r.repComps.split(' | ') : [];
+    var tot=nomes.filter(function(n){return n.trim()!=='';}).length;
+    var totChoros=mus.filter(function(m){return m.trim()!=='';}).length;
+    if(tot>max){ max=tot; rec=limparDataHistorico(r.data)+' ('+tot+' Musicistas)'; }
+    if(tot>0){ cD.push({label:'Encontro #'+r.encontroNumero, valor:tot, data:r.data, choros:totChoros, encontroNum:r.encontroNumero}); ev.push({label:'#'+r.encontroNumero, valor:tot}); }
+    nomes.forEach(function(n,i){
+      var nl=n.trim();
+      if(nl) uni[nl.toLowerCase()]=true;
+      var il=insts[i]?insts[i].trim():'';
+      if(il){
+        cI[il]=(cI[il]||0)+1;
+        if(!cISet[il]) cISet[il]=new Set();
+        cISet[il].add(normaliza(nl));
+      }
+    });
+    mus.forEach(function(m,i){
+      var ml=m.trim();
+      var cl=comps[i]?comps[i].trim():'';
+      if(ml){
+        acum++;
+        cM[ml]=(cM[ml]||0)+1;
+        if(!choroInfo[ml]) choroInfo[ml]={encontros:new Set(), compositor:cl, count:0};
+        choroInfo[ml].encontros.add(r.encontroNumero);
+        choroInfo[ml].count++;
+        if(cl && !choroInfo[ml].compositor) choroInfo[ml].compositor=cl;
+        if(cl){
+          if(!cCSet[cl]) cCSet[cl]=new Set();
+          cCSet[cl].add(normaliza(ml));
+          cCTotal[cl]=(cCTotal[cl]||0)+1;
         }
-
-        function buscarDadosPlanilha() {
-            fetch(WEB_APP_URL)
-            .then(res => res.json())
-            .then(data => {
-                if (!data.rodas || data.rodas.length === 0) return;
-
-                todosOsEncontros = data.rodas;
-                localStorage.setItem('brasileirinho_data_cache', JSON.stringify(data.rodas));
-                processarCargaInicial();
-            })
-            .catch(err => {
-                console.error("Erro ao buscar dados online, usando cache se disponível:", err);
-                const txtContador = document.getElementById('texto-contador-registros');
-                txtContador.innerHTML = `⚠️ Modo Offline (Dados locais históricos).`;
-            });
-        }
-
-        function processarCargaInicial() {
-            const params = new URLSearchParams(window.location.search);
-            let temFiltroNaUrl = false;
-
-            if (params.get('busca')) {
-                document.getElementById('filtro-busca').value = params.get('busca');
-                document.getElementById('clear-filtro-busca').classList.remove('hidden');
-                temFiltroNaUrl = true;
-            }
-            if (params.get('inst')) {
-                document.getElementById('filtro-instrumento').value = params.get('inst');
-                document.getElementById('clear-filtro-instrumento').classList.remove('hidden');
-                temFiltroNaUrl = true;
-            }
-            if (params.get('inicio')) {
-                document.getElementById('filtro-data-inicio').value = params.get('inicio');
-                temFiltroNaUrl = true;
-            }
-            if (params.get('fim')) {
-                document.getElementById('filtro-data-fim').value = params.get('fim');
-                temFiltroNaUrl = true;
-            }
-
-            aplicarFiltros();
-        }
-
-        window.onload = function() {
-            const temaSalvo = localStorage.getItem('brasileirinho_theme');
-            if (temaSalvo === 'dark') toggleDarkMode();
-
-            const cacheLocal = localStorage.getItem('brasileirinho_data_cache');
-            if (cacheLocal) {
-                todosOsEncontros = JSON.parse(cacheLocal);
-                document.getElementById('texto-contador-registros').innerHTML = `Carregando cache local...`;
-                processarCargaInicial();
-            }
-
-            buscarDadosPlanilha();
-        };
-    </script>
+      }
+    });
+  });
+  // Converte Set de choros distintos por compositor para contagem logica
+  Object.keys(cCSet).forEach(function(comp){ cC[comp]=cCSet[comp].size; });
+  // Deixa cISet global para tooltip do grafico de instrumentos
+  window._cISetDistintos = cISet;
+  window._totalRodas = lista.length;
+  document.getElementById('dash-total-rodas').innerText=lista.length; document.getElementById('dash-total-musicos').innerText=Object.keys(uni).length; document.getElementById('dash-total-musicas').innerText=Object.keys(cM).length; document.getElementById('chart-val-pico-musicos').innerText=rec;
+  // Top para visao rapida com info extra util para pesquisa
+  var topM=Object.entries(cM).sort(function(a,b){return b[1]-a[1];}).slice(0,4).map(function(entry){
+    var info=choroInfo[entry[0]]||{};
+    var comp=info.compositor||'';
+    var encontrosDistintos=info.encontros ? info.encontros.size : entry[1];
+    var extra=(comp ? comp+' • ' : '')+encontrosDistintos+' rodas';
+    return [entry[0], entry[1], extra];
+  });
+  var topC=Object.entries(cC).sort(function(a,b){return b[1]-a[1];}).slice(0,4).map(function(entry){
+    var totalExec=cCTotal[entry[0]]||entry[1];
+    var extra=entry[1]+' distintas • '+totalExec+' exec.';
+    return [entry[0], entry[1], extra];
+  });
+  var topD=cD.slice().sort(function(a,b){return b.valor-a.valor;}).slice(0,4).map(function(obj){
+    var dataStr=limparDataHistorico(obj.data);
+    var extra=dataStr+' • '+obj.choros+' choros';
+    return [obj.label, obj.valor, extra];
+  });
+  renderizarMiniRanking('ranking-musicas', topM, 'bg-emerald-600', 'x', 'musica');
+  renderizarMiniRanking('ranking-compositores', topC, 'bg-amber-500', 'x', 'compositor');
+  renderizarMiniRanking('ranking-dias-cheios', topD, 'bg-stone-500', ' m.', 'dia');
+  var topMG=Object.entries(cM).sort(function(a,b){return b[1]-a[1];}).slice(0,10); var topCG=Object.entries(cC).sort(function(a,b){return b[1]-a[1];}).slice(0,10); var mixG=Object.entries(cI).sort(function(a,b){return b[1]-a[1];}).slice(0,7);
+  inicializarGraficosAvancados(ev, topMG, topCG, mixG);
+}
+function processarCargaInicial(){
+  try{
+    var params=new URLSearchParams(window.location.search);
+    if(params.get('busca')){ var el=document.getElementById('filtro-busca'); if(el){ el.value=params.get('busca'); var cb=document.getElementById('clear-filtro-busca'); if(cb) cb.classList.remove('hidden'); } }
+    if(params.get('inst')){ var el2=document.getElementById('filtro-instrumento'); if(el2){ el2.value=params.get('inst'); var ci=document.getElementById('clear-filtro-instrumento'); if(ci) ci.classList.remove('hidden'); } }
+    // Datas removidas do layout otimizado - compatibilidade mantida
+    if(params.get('inicio')){ var di=document.getElementById('filtro-data-inicio'); if(di) di.value=params.get('inicio'); }
+    if(params.get('fim')){ var df=document.getElementById('filtro-data-fim'); if(df) df.value=params.get('fim'); }
+  }catch(e){}
+  aplicarFiltros();
+}
+window.addEventListener('load', function(){
+  try{ var t=localStorage.getItem('brasileirinho_theme'); if(t==='dark'){ var b=document.getElementById('body-app'); if(b){ b.classList.add('dark-mode'); var btn=document.getElementById('btn-dark'); if(btn) btn.textContent='Sol'; } } }catch(e){}
+  document.getElementById('btn-dark').addEventListener('click', toggleDarkMode);
+  document.getElementById('btn-consulta').addEventListener('click', function(){ switchTab('consulta-tab'); });
+  document.getElementById('btn-dashboard').addEventListener('click', function(){ switchTab('dashboard-tab'); });
+  document.getElementById('sub-btn-mini').addEventListener('click', function(){ alternarSubVisaoDash('mini'); });
+  document.getElementById('sub-btn-avancada').addEventListener('click', function(){ alternarSubVisaoDash('avancada'); });
+  document.getElementById('filtro-busca').addEventListener('input', function(){ aplicarFiltrosDebounced('filtro-busca'); });
+  document.getElementById('filtro-instrumento').addEventListener('input', function(){ aplicarFiltrosDebounced('filtro-instrumento'); });
+  var diEl=document.getElementById('filtro-data-inicio'); if(diEl) diEl.addEventListener('change', aplicarFiltros);
+  var dfEl=document.getElementById('filtro-data-fim'); if(dfEl) dfEl.addEventListener('change', aplicarFiltros);
+  document.getElementById('clear-filtro-busca').addEventListener('click', function(){ limparInput('filtro-busca'); });
+  document.getElementById('clear-filtro-instrumento').addEventListener('click', function(){ limparInput('filtro-instrumento'); });
+  document.getElementById('btnLimpar').addEventListener('click', limparFiltros);
+  document.getElementById('btnExport').addEventListener('click', exportarParaCSV);
+  var chips=document.querySelectorAll('.chip');
+  for(var i=0;i<chips.length;i++){ chips[i].addEventListener('click', function(){ aplicarChip(this.getAttribute('data-chip'), this.getAttribute('data-tipo')); }); }
+  // Otimizacao historico
+  var btnHG=document.getElementById('btn-historico-geral'); if(btnHG) btnHG.addEventListener('click', toggleHistoricoGeral);
+  var btnExp=document.getElementById('btn-expandir-todos'); if(btnExp) btnExp.addEventListener('click', expandirTodosEncontros);
+  var btnRec=document.getElementById('btn-recolher-todos'); if(btnRec) btnRec.addEventListener('click', recolherTodosEncontros);
+  var selQuinta=document.getElementById('filtro-quinta'); if(selQuinta) selQuinta.addEventListener('change', aplicarFiltros);
+  // Atalho de teclado "/" para focar busca - mais funcional
+  document.addEventListener('keydown', function(e){
+    if(e.key==='/' && document.activeElement.tagName!=='INPUT' && document.activeElement.tagName!=='SELECT'){ e.preventDefault(); var fb=document.getElementById('filtro-busca'); if(fb) fb.focus(); }
+    if(e.key==='Escape'){ var fb=document.getElementById('filtro-busca'); var fi=document.getElementById('filtro-instrumento'); var fq=document.getElementById('filtro-quinta'); if((fb && fb.value) || (fi && fi.value) || (fq && fq.value)){ limparFiltros(); } }
+  });
+  buscarDadosSupabase();
+});
+</script>
 </body>
 </html>
